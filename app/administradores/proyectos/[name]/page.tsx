@@ -21,7 +21,13 @@ import {
   X,
   Loader2,
   Edit2,
-  UserPlus
+  UserPlus,
+  ChevronRight,
+  ChevronDown,
+  UserMinus,
+  MessageSquare,
+  Activity,
+  Sparkles
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,6 +36,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -85,6 +92,9 @@ export default function ProjectDetailPage() {
     rol: ''
   });
   const [allUsuarios, setAllUsuarios] = useState<any[]>([]);
+
+  // Estados para vista en árbol
+  const [openFolders, setOpenFolders] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadProjectData();
@@ -456,6 +466,149 @@ export default function ProjectDetailPage() {
     }
   };
 
+  // Funciones para mejorar UX/UI de actividad
+  const getActivityIcon = (tipo: string) => {
+    switch (tipo) {
+      case 'miembro_agregado':
+        return UserPlus;
+      case 'miembro_removido':
+        return UserMinus;
+      case 'archivo_subido':
+        return Upload;
+      case 'comentario':
+        return MessageSquare;
+      default:
+        return Activity;
+    }
+  };
+
+  const getActivityColor = (tipo: string) => {
+    switch (tipo) {
+      case 'miembro_agregado':
+        return 'bg-success/10 text-success border-success/20';
+      case 'miembro_removido':
+        return 'bg-destructive/10 text-destructive border-destructive/20';
+      case 'archivo_subido':
+        return 'bg-primary/10 text-primary border-primary/20';
+      case 'comentario':
+        return 'bg-info/10 text-info border-info/20';
+      default:
+        return 'bg-accent/50 text-foreground border-border';
+    }
+  };
+
+  const getActivityBadge = (tipo: string) => {
+    switch (tipo) {
+      case 'miembro_agregado':
+        return { text: 'Equipo', color: 'bg-success/20 text-success border-success/30' };
+      case 'miembro_removido':
+        return { text: 'Equipo', color: 'bg-destructive/20 text-destructive border-destructive/30' };
+      case 'archivo_subido':
+        return { text: 'Archivo', color: 'bg-primary/20 text-primary border-primary/30' };
+      case 'comentario':
+        return { text: 'Comentario', color: 'bg-info/20 text-info border-info/30' };
+      default:
+        return { text: 'Actividad', color: 'bg-muted text-foreground border-border' };
+    }
+  };
+
+  const getTimeAgo = (timestamp: string) => {
+    const now = new Date();
+    const past = new Date(timestamp);
+    const diffInMinutes = Math.floor((now.getTime() - past.getTime()) / (1000 * 60));
+
+    if (diffInMinutes < 1) return 'Justo ahora';
+    if (diffInMinutes < 60) return `Hace ${diffInMinutes}m`;
+    if (diffInMinutes < 1440) return `Hace ${Math.floor(diffInMinutes / 60)}h`;
+    return formatDate(timestamp);
+  };
+
+  // Función para toggle de carpeta abierta
+  const toggleFolder = (carpetaId: string) => {
+    setOpenFolders(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(carpetaId)) {
+        newSet.delete(carpetaId);
+      } else {
+        newSet.add(carpetaId);
+      }
+      return newSet;
+    });
+  };
+
+  // Función para obtener carpetas raíz (sin padre)
+  const getRootFolders = () => {
+    return carpetas.filter((carpeta: any) => !carpeta.padreId);
+  };
+
+  // Función para renderizar carpeta simple con archivos
+  const renderFolder = (carpeta: any) => {
+    const isOpen = openFolders.has(carpeta.id);
+    const archivosCarpeta = archivos.filter((arch: any) => arch.carpetaId === carpeta.id);
+
+    return (
+      <div key={carpeta.id} className="border border-border rounded-lg overflow-hidden">
+        <Collapsible open={isOpen} onOpenChange={() => toggleFolder(carpeta.id)}>
+          <CollapsibleTrigger className="w-full">
+            <div className="flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+              <div className="flex items-center gap-2">
+                {isOpen ? (
+                  <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 text-muted-foreground transition-transform" />
+                )}
+                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <Folder className="w-5 h-5 text-primary" />
+                </div>
+              </div>
+              <div className="flex-1 text-left">
+                <h3 className="font-semibold text-foreground">{carpeta.nombre}</h3>
+                {carpeta.descripcion && (
+                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                    {carpeta.descripcion}
+                  </p>
+                )}
+              </div>
+              <div className="text-right">
+                <Badge variant="outline" className="text-xs">
+                  {archivosCarpeta.length} {archivosCarpeta.length === 1 ? 'archivo' : 'archivos'}
+                </Badge>
+              </div>
+            </div>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="border-t border-border bg-muted/20">
+              {archivosCarpeta.length > 0 ? (
+                <div className="p-4 space-y-1">
+                  {archivosCarpeta.map((archivo: any) => (
+                    <div
+                      key={archivo.id}
+                      className="flex items-center gap-3 p-3 rounded-md hover:bg-background transition-colors cursor-pointer group border border-border/50"
+                      onClick={() => handleDescargarArchivo(archivo)}
+                    >
+                      <FileText className="w-4 h-4 text-primary flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm text-foreground truncate">{archivo.nombreOriginal}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {formatSize(archivo.tamaño)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center text-muted-foreground">
+                  <FileText className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                  <p className="text-sm">No hay archivos en esta carpeta</p>
+                </div>
+              )}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
+    );
+  };
+
   if (loading || !proyecto) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -578,60 +731,8 @@ export default function ProjectDetailPage() {
             )}
 
             {carpetas.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {carpetas.map((carpeta: any) => {
-                  const archivosCarpeta = archivos.filter((arch: any) => arch.carpetaId === carpeta.id);
-                  return (
-                    <Card key={carpeta.id} className="border-primary/20 hover:border-primary/40 transition-all">
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                              <Folder className="w-5 h-5 text-primary" />
-                            </div>
-                            <div>
-                              <CardTitle className="text-base">{carpeta.nombre}</CardTitle>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                {archivosCarpeta.length} {archivosCarpeta.length === 1 ? 'archivo' : 'archivos'}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        {carpeta.descripcion && (
-                          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                            {carpeta.descripcion}
-                          </p>
-                        )}
-                        {archivosCarpeta.length > 0 && (
-                          <div className="space-y-2">
-                            {archivosCarpeta.slice(0, 3).map((archivo: any) => (
-                              <div
-                                key={archivo.id}
-                                className="flex items-center justify-between p-2 bg-muted/50 rounded-md hover:bg-muted transition-colors cursor-pointer"
-                                onClick={() => handleDescargarArchivo(archivo)}
-                              >
-                                <div className="flex items-center gap-2 flex-1 min-w-0">
-                                  <FileText className="w-4 h-4 text-primary flex-shrink-0" />
-                                  <span className="text-sm truncate">{archivo.nombreOriginal}</span>
-                                </div>
-                                <span className="text-xs text-muted-foreground">
-                                  {formatSize(archivo.tamaño)}
-                                </span>
-                              </div>
-                            ))}
-                            {archivosCarpeta.length > 3 && (
-                              <p className="text-xs text-muted-foreground text-center mt-2">
-                                +{archivosCarpeta.length - 3} más
-                              </p>
-                            )}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+              <div className="space-y-2">
+                {carpetas.map((carpeta: any) => renderFolder(carpeta))}
               </div>
             ) : (
               <div className="text-center py-16 text-muted-foreground">
@@ -734,28 +835,56 @@ export default function ProjectDetailPage() {
           {/* Tab Actividad */}
           <TabsContent value="actividad" className="space-y-4">
             {actividades.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {actividades.map((actividad: any) => {
                   const usuario = usuariosProyectosStorage.getById(actividad.usuarioId);
+                  const ActivityIcon = getActivityIcon(actividad.tipo);
+                  const activityColors = getActivityColor(actividad.tipo);
+                  const activityBadge = getActivityBadge(actividad.tipo);
+
                   return (
-                    <Card key={actividad.id} className="border-border">
-                      <CardContent className="pt-4">
-                        <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                            <Clock className="w-4 h-4 text-primary" />
+                    <Card key={actividad.id} className={`border-l-4 ${activityColors} hover:shadow-md transition-all`}>
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-4">
+                          {/* Icono con fondo distintivo */}
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 border-2 ${activityColors.split(' ')[2]}`}>
+                            <ActivityIcon className="w-6 h-6" />
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm text-foreground">
+
+                          {/* Contenido principal */}
+                          <div className="flex-1 min-w-0 space-y-2">
+                            {/* Descripción principal */}
+                            <p className="text-base font-medium text-foreground leading-relaxed">
                               {actividad.descripcion}
                             </p>
-                            <div className="flex items-center gap-2 mt-2">
-                              <span className="text-xs text-muted-foreground">
-                                {usuario ? `${usuario.nombre} ${usuario.apellidos}` : 'Usuario desconocido'}
-                              </span>
-                              <span className="text-xs text-muted-foreground">•</span>
-                              <span className="text-xs text-muted-foreground">
-                                {formatDate(actividad.fechaCreacion)}
-                              </span>
+
+                            {/* Footer con metadata */}
+                            <div className="flex items-center gap-3 flex-wrap">
+                              {/* Avatar del usuario */}
+                              {usuario && (
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20">
+                                    <User className="w-4 h-4 text-primary" />
+                                  </div>
+                                  <span className="text-sm font-medium text-foreground">
+                                    {usuario.nombre} {usuario.apellidos}
+                                  </span>
+                                </div>
+                              )}
+
+                              {/* Separador */}
+                              <div className="h-4 w-px bg-border" />
+
+                              {/* Badge de tipo */}
+                              <Badge variant="outline" className={activityBadge.color}>
+                                {activityBadge.text}
+                              </Badge>
+
+                              {/* Tiempo */}
+                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground ml-auto">
+                                <Clock className="w-3.5 h-3.5" />
+                                {getTimeAgo(actividad.fechaCreacion)}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -765,12 +894,16 @@ export default function ProjectDetailPage() {
                 })}
               </div>
             ) : (
-              <div className="text-center py-16 text-muted-foreground">
-                <div className="w-24 h-24 mx-auto mb-4 bg-primary/5 rounded-full flex items-center justify-center">
-                  <Clock className="w-12 h-12 text-primary/50" />
+              <div className="text-center py-20 text-muted-foreground">
+                <div className="w-32 h-32 mx-auto mb-6 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full flex items-center justify-center relative">
+                  <Activity className="w-16 h-16 text-primary/30 absolute" />
+                  <Sparkles className="w-8 h-8 text-primary/50 absolute -top-2 -right-2 animate-pulse" />
                 </div>
-                <p className="text-lg font-medium mb-2">No hay actividad registrada</p>
-                <p className="text-sm">Las acciones del proyecto aparecerán aquí</p>
+                <h3 className="text-xl font-semibold text-foreground mb-2">Sin actividad aún</h3>
+                <p className="text-sm max-w-md mx-auto">
+                  Las acciones del equipo aparecerán aquí cuando se agreguen miembros, 
+                  suban archivos o realicen cambios en el proyecto
+                </p>
               </div>
             )}
           </TabsContent>

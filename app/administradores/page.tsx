@@ -37,6 +37,8 @@ import {
 import { useEffect, useState } from 'react';
 import { getSession } from '@/lib/auth';
 import { toast } from 'sonner';
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from 'recharts';
+import { ChartConfig, ChartContainer } from '@/components/ui/chart';
 
 interface DashboardStats {
   totalEmpresas: number;
@@ -46,6 +48,7 @@ interface DashboardStats {
   proyectosCerrados: number;
   totalArchivos: number;
   ultimosProyectos: any[];
+  distribucionEmpresas: any[];
 }
 
 export default function AdministradorDashboard() {
@@ -56,7 +59,8 @@ export default function AdministradorDashboard() {
     proyectosAbiertos: 0,
     proyectosCerrados: 0,
     totalArchivos: 0,
-    ultimosProyectos: []
+    ultimosProyectos: [],
+    distribucionEmpresas: []
   });
 
   // Estados para el modal
@@ -84,6 +88,15 @@ export default function AdministradorDashboard() {
       .sort((a, b) => new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime())
       .slice(0, 5);
 
+    // Calcular distribución por empresa
+    const distribucionEmpresas = empresas.map(empresa => {
+      const proyectosEmpresa = proyectos.filter(p => p.empresaId === empresa.id);
+      return {
+        empresa: empresa.nombre.length > 20 ? empresa.nombre.substring(0, 20) + '...' : empresa.nombre,
+        proyectos: proyectosEmpresa.length
+      };
+    });
+
     setStats({
       totalEmpresas: empresas.length,
       totalProyectos: proyectos.length,
@@ -91,13 +104,22 @@ export default function AdministradorDashboard() {
       proyectosAbiertos,
       proyectosCerrados,
       totalArchivos: archivos.filter(a => a.estado === 'activo').length,
-      ultimosProyectos
+      ultimosProyectos,
+      distribucionEmpresas
     });
   };
 
   useEffect(() => {
     loadStats();
   }, []);
+
+  // Configuración del gráfico
+  const chartConfig = {
+    proyectos: {
+      label: "Proyectos",
+      color: "var(--chart-1)",
+    },
+  } satisfies ChartConfig;
 
   const handleCrearProyecto = () => {
     setIsModalOpen(true);
@@ -263,12 +285,56 @@ export default function AdministradorDashboard() {
                 <p className="text-sm text-muted-foreground">
                   Visualización de proyectos por empresa registrada
                 </p>
-                <div className="flex items-center justify-center h-40 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border border-primary/20">
-                  <div className="text-center">
-                    <BarChart3 className="w-12 h-12 mx-auto mb-2 text-primary/50" />
-                    <p className="text-sm font-medium text-muted-foreground">Gráfico en desarrollo</p>
+                {stats.distribucionEmpresas.length > 0 ? (
+                  <ChartContainer config={chartConfig}>
+                    <BarChart
+                      accessibilityLayer
+                      data={stats.distribucionEmpresas}
+                      layout="vertical"
+                      margin={{
+                        top: 0,
+                        right: 16,
+                        left: 16,
+                        bottom: 0,
+                      }}
+                    >
+                      <CartesianGrid horizontal={false} strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis
+                        type="number"
+                        hide
+                      />
+                      <YAxis
+                        dataKey="empresa"
+                        type="category"
+                        tickLine={false}
+                        tickMargin={10}
+                        axisLine={false}
+                        className="text-muted-foreground"
+                        width={120}
+                      />
+                      <Bar
+                        dataKey="proyectos"
+                        fill="var(--color-proyectos)"
+                        radius={[0, 4, 4, 0]}
+                      >
+                        <LabelList
+                          dataKey="proyectos"
+                          position="right"
+                          offset={8}
+                          className="fill-foreground font-medium"
+                          fontSize={12}
+                        />
+                      </Bar>
+                    </BarChart>
+                  </ChartContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-40 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border border-primary/20">
+                    <div className="text-center">
+                      <BarChart3 className="w-12 h-12 mx-auto mb-2 text-primary/50" />
+                      <p className="text-sm font-medium text-muted-foreground">Sin datos</p>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </CardContent>
           </Card>

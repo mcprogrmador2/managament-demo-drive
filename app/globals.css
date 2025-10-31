@@ -44,113 +44,116 @@
 }
 
 /* PALETA EMPRESARIAL — LIGHT */
+/* Combinación elegante: Azul Marino Vibrante + Azul Eléctrico */
 :root {
   /* Base limpia */
-  --background: #ffffff;
-  --foreground: #0f172a;   /* slate 900 - texto oscuro */
+  --background: #fafbfc;
+  --foreground: #0a0e27;           /* azul marino muy oscuro para texto */
   --card: #ffffff;
-  --card-foreground: #0f172a;
+  --card-foreground: #0a0e27;
   --popover: #ffffff;
-  --popover-foreground: #0f172a;
+  --popover-foreground: #0a0e27;
 
-  /* Primario — Azul eléctrico */
-  --primary: #0066FF;              /* azul eléctrico intenso */
+  /* Primario — Azul marino vibrante profundo */
+  --primary: #1e3a8a;              /* azul marino profesional y vibrante */
   --primary-foreground: #ffffff;
 
   /* Secundarios y superficies */
-  --secondary: #f1f5f9;            /* slate 100 - gris claro */
-  --secondary-foreground: #0f172a;
-  --muted: #e2e8f0;                /* slate 200 - gris suave */
-  --muted-foreground: #64748b;     /* slate 500 - gris medio */
-  --accent: #eff6ff;               /* azul 50 - azul muy suave */
-  --accent-foreground: #1e40af;
+  --secondary: #f0f4f8;            /* azul muy claro y suave */
+  --secondary-foreground: #0a0e27;
+  --muted: #e2e8f0;                /* gris-azulado claro */
+  --muted-foreground: #5a6c7d;     /* gris-azulado medio */
+  --accent: #dbeafe;               /* azul eléctrico suave para acentos */
+  --accent-foreground: #1e3a8a;
 
   /* Estados */
   --destructive: #dc2626;          /* rojo para errores críticos */
   --destructive-foreground: #ffffff;
-  --success: #10b981;              /* verde-emerald para éxito */
+  --success: #059669;              /* verde esmeralda elegante */
   --success-foreground: #ffffff;
   --warning: #f59e0b;              /* ámbar de advertencia */
   --warning-foreground: #ffffff;
-  --info: #0066FF;                 /* azul eléctrico para información */
+  --info: #2563eb;                 /* azul eléctrico para información */
   --info-foreground: #ffffff;
 
   /* Bordes e inputs */
-  --border: #cbd5e1;               /* slate 300 - borde gris */
-  --input: #e2e8f0;                /* slate 200 */
-  --ring: #0066FF;                 /* anillo en azul eléctrico */
+  --border: #cbd5e1;               /* borde gris-azulado */
+  --input: #e2e8f0;                
+  --ring: #2563eb;                 /* anillo en azul eléctrico */
 
-  /* Sidebar */
-  --sidebar: #f8fafc;              /* slate 50 */
-  --sidebar-foreground: #0f172a;
-  --sidebar-primary: #0066FF;
+  /* Sidebar - Tono azul marino elegante */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0a0e27;
+  --sidebar-primary: #1e3a8a;      /* azul marino vibrante */
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #e0e7ff;       /* indigo 100 */
-  --sidebar-accent-foreground: #1e293b;
-  --sidebar-border: #e2e8f0;
-  --sidebar-ring: #0066FF;
+  --sidebar-accent: #e0f2fe;       /* azul eléctrico muy claro */
+  --sidebar-accent-foreground: #0a0e27;
+  --sidebar-border: #cbd5e1;
+  --sidebar-ring: #2563eb;         /* azul eléctrico */
 
-  /* Charts (paleta coherente para dashboards) */
-  --chart-1: #0066FF;  /* azul eléctrico primario */
-  --chart-2: #3b82f6;  /* blue 500 */
-  --chart-3: #2563eb;  /* blue 600 */
-  --chart-4: #10b981;  /* emerald 500 */
-  --chart-5: #8b5cf6;  /* violet 500 */
+  /* Charts (paleta azul marino + eléctrico coherente) */
+  --chart-1: #1e3a8a;  /* azul marino vibrante */
+  --chart-2: #2563eb;  /* azul eléctrico medio */
+  --chart-3: #3b82f6;  /* azul eléctrico brillante */
+  --chart-4: #059669;  /* verde esmeralda */
+  --chart-5: #7c3aed;  /* púrpura vibrante */
 
   /* Radios */
   --radius: 8px;
 }
 
 /* PALETA EMPRESARIAL — DARK */
+/* Azul marino profundo con acentos eléctricos brillantes */
 .dark {
-  --background: #0f172a;           /* slate 900 - fondo oscuro */
-  --foreground: #f8fafc;
-  --card: #1e293b;                 /* slate 800 */
-  --card-foreground: #f8fafc;
-  --popover: #1e293b;
-  --popover-foreground: #f8fafc;
+  /* Base elegante y profunda */
+  --background: #0f1422;           /* azul marino muy oscuro y profundo */
+  --foreground: #e8f0f8;           /* azul grisáceo muy claro */
+  --card: #1a2332;                 /* azul marino ligeramente más claro */
+  --card-foreground: #e8f0f8;
+  --popover: #1a2332;
+  --popover-foreground: #e8f0f8;
 
-  /* Primario más luminoso en dark para contraste */
-  --primary: #60a5fa;              /* blue 400 - azul eléctrico brillante */
-  --primary-foreground: #030712;
+  /* Primario — Azul eléctrico brillante para máximo contraste */
+  --primary: #3b82f6;              /* azul eléctrico vibrante y luminoso */
+  --primary-foreground: #ffffff;
 
-  --secondary: #1e293b;
-  --secondary-foreground: #f8fafc;
-  --muted: #334155;                /* slate 700 */
-  --muted-foreground: #94a3b8;     /* slate 400 */
-  --accent: #1e3a8a;               /* blue 900 - azul eléctrico oscuro */
+  --secondary: #1f2a44;            /* azul marino medio oscuro */
+  --secondary-foreground: #e8f0f8;
+  --muted: #2a3441;                /* azul marino grisáceo */
+  --muted-foreground: #8d9bb8;     /* azul grisáceo medio */
+  --accent: #1e3a8a;               /* azul marino vibrante para acentos */
   --accent-foreground: #dbeafe;
 
-  /* Estados en dark */
-  --destructive: #ef4444;          /* rojo legible en dark */
-  --destructive-foreground: #450a0a;
-  --success: #34d399;              /* emerald 400 */
-  --success-foreground: #022c22;
-  --warning: #f59e0b;              /* amber 500 */
-  --warning-foreground: #451a03;
-  --info: #60a5fa;                 /* blue 400 */
-  --info-foreground: #030712;
+  /* Estados en dark con buena legibilidad */
+  --destructive: #ef4444;          /* rojo intenso y legible */
+  --destructive-foreground: #ffffff;
+  --success: #22c55e;              /* verde brillante */
+  --success-foreground: #ffffff;
+  --warning: #f59e0b;              /* ámbar cálido */
+  --warning-foreground: #ffffff;
+  --info: #0ea5e9;                 /* azul eléctrico cyan */
+  --info-foreground: #ffffff;
 
-  --border: #334155;
-  --input: #475569;                /* slate 600 */
-  --ring: #60a5fa;
+  --border: #2a3441;               /* borde azul marino */
+  --input: #2f3a4a;                /* input azul marino oscuro */
+  --ring: #3b82f6;                 /* anillo azul eléctrico */
 
-  /* Sidebar */
-  --sidebar: #1e293b;
-  --sidebar-foreground: #e2e8f0;
-  --sidebar-primary: #60a5fa;
-  --sidebar-primary-foreground: #030712;
-  --sidebar-accent: #334155;
-  --sidebar-accent-foreground: #cbd5e1;
-  --sidebar-border: #475569;
-  --sidebar-ring: #60a5fa;
+  /* Sidebar - Azul marino elegante con acentos eléctricos */
+  --sidebar: #141b2e;              /* azul marino sidebar */
+  --sidebar-foreground: #e8f0f8;
+  --sidebar-primary: #3b82f6;      /* azul eléctrico para items activos */
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1e3a8a;       /* azul marino para hover */
+  --sidebar-accent-foreground: #dbeafe;
+  --sidebar-border: #2a3441;
+  --sidebar-ring: #3b82f6;         /* azul eléctrico */
 
-  /* Charts (ajustados para dark) */
-  --chart-1: #60a5fa;  /* azul eléctrico brillante */
-  --chart-2: #818cf8;  /* indigo 400 */
-  --chart-3: #3b82f6;  /* blue 500 */
-  --chart-4: #34d399;  /* emerald 400 */
-  --chart-5: #a78bfa;  /* violet 400 */
+  /* Charts (paleta azul vibrante coherente) */
+  --chart-1: #3b82f6;  /* azul eléctrico vibrante */
+  --chart-2: #0ea5e9;  /* azul cyan brillante */
+  --chart-3: #6366f1;  /* indigo vibrante */
+  --chart-4: #22c55e;  /* verde brillante */
+  --chart-5: #a78bfa;  /* púrpura suave */
 }
 
 @layer base {

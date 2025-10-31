@@ -399,10 +399,17 @@ const handleSubmit = async (e: React.FormEvent) => {
 - **Toasts**: Usar `toast.success()` y `toast.error()` para feedback
 
 #### Paleta de Colores y Tema
-- **Color primario**: Azul eléctrico (#0066FF en light, #60a5fa en dark)
-- **Colores de estado**: Success, Warning, Destructive, Info bien diferenciados
-- **Modo oscuro**: Implementado con variables CSS
-- **Sidebar**: Colores específicos para navegación lateral
+- **Combinación elegante**: Azul Marino Vibrante (#1e3a8a) + Azul Eléctrico (#2563eb, #3b82f6)
+- **Light Mode**: 
+  - Primario: Azul marino vibrante (#1e3a8a)
+  - Secundario: Azul eléctrico (#2563eb)
+  - Fondos: Blancos y azules muy claros (#fafbfc, #f0f4f8)
+- **Dark Mode**:
+  - Primario: Azul eléctrico brillante (#3b82f6)
+  - Secundario: Azul marino profundo (#0f1422, #1a2332)
+  - Fondos: Azules marinos profundos con contraste elegante
+- **Colores de estado**: Success (#059669), Warning (#f59e0b), Destructive (#dc2626), Info (#0ea5e9)
+- **Sidebar**: Azul marino elegante con acentos eléctricos
 - **Variables CSS**: Usar siempre las definidas en `globals.css`
 
 #### Componentes UI Principales
