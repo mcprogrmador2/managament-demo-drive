@@ -1,9 +1,9 @@
-export const AreasPage = () => {
-    return (
-        <div>
-            <h1>Areas</h1>
-        </div>
-    )
-}
+'use client';
 
-export default AreasPage;
+export default function AreasPage() {
+  return (
+    <div>
+      <h1>Areas</h1>
+    </div>
+  );
+}

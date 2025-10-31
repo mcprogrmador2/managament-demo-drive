@@ -1,9 +1,9 @@
-export const TrabajadoresPage = () => {
-    return (
-        <div>
-            <h1>Trabajadores</h1>
-        </div>
-    )
-}
+'use client';
 
-export default TrabajadoresPage;
+export default function TrabajadoresPage() {
+  return (
+    <div>
+      <h1>Trabajadores</h1>
+    </div>
+  );
+}

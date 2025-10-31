@@ -1,8 +1,9 @@
-export const ProyectosPage = () => {                    return (
-        <div>
-            <h1>Proyectos</h1>
-        </div>
-    )
-}
+'use client';
 
-export default ProyectosPage;   
+export default function ProyectosPage() {
+  return (
+    <div>
+      <h1>Proyectos</h1>
+    </div>
+  );
+}   
