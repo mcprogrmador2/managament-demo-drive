@@ -1,0 +1,353 @@
+# REGLAS DE DESARROLLO
+
+## Principios Fundamentales
+
+### 1. Arquitectura Limpia y Ordenada
+- **Separación de responsabilidades**: Cada módulo debe tener una función específica y bien definida
+- **Estructura de carpetas consistente**: Seguir la organización establecida del proyecto
+- **Patrones de diseño**: Implementar patrones probados y mantenibles
+- **Dependencias mínimas**: Evitar dependencias innecesarias entre componentes
+
+### 2. Principio de Responsabilidad Única
+- **Un componente, una función**: Cada componente debe tener una sola responsabilidad
+- **Métodos específicos**: Las funciones deben hacer una sola cosa y hacerla bien
+- **Separación de lógica**: Separar la lógica de negocio de la presentación
+- **Reutilización**: Crear componentes que puedan ser reutilizados en diferentes contextos
+
+### 3. Código Mantenible y Bien Estructurado
+- **Nomenclatura clara**: Usar nombres descriptivos para variables, funciones y componentes
+- **Comentarios útiles**: Documentar código complejo o lógica de negocio importante
+- **Consistencia**: Mantener el mismo estilo de código en todo el proyecto
+- **Refactoring**: Refactorizar código cuando sea necesario para mejorar la legibilidad
+
+## Estilos y CSS
+
+### 4. Uso Correcto de @globals.css
+- **Variables CSS**: Utilizar las variables CSS definidas en globals.css para colores, espaciados y tipografías
+- **Tema claro/oscuro**: Implementar correctamente el sistema de temas usando las variables CSS
+- **Componentes UI**: Usar los estilos base definidos para mantener consistencia visual
+- **Responsive design**: Aplicar los breakpoints y estilos responsive definidos
+
+### 5. Estilos Consistentes
+- **Paleta de colores**: Usar únicamente los colores definidos en las variables CSS
+- **Tipografía**: Aplicar las fuentes y tamaños establecidos en el sistema de diseño
+- **Espaciado**: Utilizar el sistema de espaciado consistente (--spacing)
+- **Bordes y radios**: Aplicar los valores de border-radius y border definidos
+
+## Estructura de Componentes
+
+### 6. Organización de Archivos
+- **Componentes reutilizables**: Crear en `/components/ui/`
+- **Componentes específicos**: Crear en `/components/` con nombres descriptivos
+- **Páginas**: Organizar en `/app/` siguiendo la estructura de rutas
+- **Hooks personalizados**: Crear en `/hooks/` para lógica reutilizable
+
+### 7. Nomenclatura y Convenciones
+- **Componentes**: Usar PascalCase (ej: `UserProfile`, `DataTable`)
+- **Archivos**: Usar kebab-case (ej: `user-profile.tsx`, `data-table.tsx`)
+- **Funciones**: Usar camelCase (ej: `handleSubmit`, `fetchUserData`)
+- **Constantes**: Usar UPPER_SNAKE_CASE (ej: `API_ENDPOINTS`, `MAX_ITEMS`)
+
+## Calidad del Código
+
+### 8. Estándares de Calidad
+- **TypeScript**: Usar tipos estrictos y interfaces bien definidas
+- **Error handling**: Implementar manejo de errores apropiado
+- **Performance**: Optimizar renders y evitar re-renders innecesarios
+- **Accesibilidad**: Implementar atributos ARIA y navegación por teclado
+
+### 9. Testing y Validación
+- **Validación de datos**: Validar entradas de usuario y datos de API
+- **Manejo de estados**: Gestionar correctamente los estados de carga, error y éxito
+- **Edge cases**: Considerar casos límite y manejar errores graciosamente
+
+## Backend y Base de Datos
+
+### 10. Sistema de Diseño Visual
+
+#### Filosofía Visual
+- **Minimalismo expresivo**: Menos elementos, más contraste, tipografías con personalidad y aire generoso
+- **Jerarquía por intención**: 1 acción primaria por vista, 1–2 secundarias; todo lo demás es apoyo
+- **Asimetrías controladas**: Rompe la monotonía con grid y composiciones 2/3 – 1/3, pero mantén alineaciones ópticas
+
+#### Lenguaje Visual (Sistema)
+- **Color por roles**: bg, surface, border, fg, muted, accent, success, warning, danger. Evita nombres de tonos (blue-500)
+- **Tonal mapping**: En light usa superficies casi blancas y acentos sobrios; en dark usa grises profundos con acentos saturados
+- **Tipografía**:
+  - Escala fluida con clamp() (ej. h1: clamp(28px, 4vw, 44px))
+  - Títulos con ligera compresión (tracking -1% a -2%) y body con tracking 0%–+1%
+  - Peso: 600 en títulos, 400 en cuerpo; 500 en botones
+- **Elevación y profundidad**:
+  - Nivel 0: plano (sin sombra)
+  - Nivel 1 (cards): sombra suave + borde 1px translúcido
+  - Nivel 2 (popovers): sombra media + blur muy sutil
+  - Nivel 3 (modal): sombra marcada + backdrop con luz direccional (gradiente radial tenue)
+- **Bordes**: rounded-2xl por defecto; xl en inputs; full sólo en chips/avatars
+
+#### Motion System (Sin Saturar)
+- **Propósito > adorno**: Anima para orientar (transiciones entre estados, foco, jerarquía)
+- **Duraciones**: 120–180ms (UI rápida), 200–260ms (navegación), 300–400ms (entradas grandes)
+- **Curvas**: ease-out para entradas, ease-in para salidas; "spring" leve (stiffness baja) en microinteracciones
+- **Micro**:
+  - Hover: elevación +2px y tinte del borde (no agrandar más de 1.02)
+  - Press: compresión 0.98 y resalte del contorno
+  - Focus: ring nítido (2px) con doble capa (ring + ring-offset)
+
+#### Patrones de Layout "Premium"
+- **Hero funcional**: Título claro, subtítulo breve, 1 CTA y 1 acción secundaria. Ilustración/3D sutil o mockup real del producto
+- **Secciones en "bandas"**: Alterna surface y bg para marcar ritmo; usa gradientes suaves para transiciones
+- **Listas maestras**: Encabezado "sticky", filtros compactos colapsables, scroll contextual (arrastre/drag en móvil) y empty states con CTA
+- **Tableros**: Tarjetas densidad "comfortable", KPIs con micro-charts, toques de vidrio suave (glass-lite) sólo en overlays
+
+#### Componentes con Carácter (Elegantes por Defecto)
+- **Buttons**: primary (sólido), soft (tinte), ghost (texto), danger, quiet (link). Todos con loading y accesibilidad
+- **Inputs**: Borde 1px translúcido + fill surface-raise-1. Error con borde y hint; success sutil (icono + tono)
+- **Cards**: Cabecera con actions "ghost", cuerpo aireado, pie con slots (acciones o meta)
+- **Nav/Sidebar**: Icono + label; active = chip/blip lateral, no sólo color
+- **Tables**: Cabeceras "pegajosas", preview de filas (row expansion), skeleton consistente
+- **Steppers**: Claro, "progressive disclosure", estados done/current/locked diferenciados visualmente
+
+#### Estados Hermosos (Vacío, Carga, Error)
+- **Vacío**: Icono/ilustración minimal + frase empática + CTA directa
+- **Carga**: Skeletons coherentes con el contenido (no spinners sueltos)
+- **Error**: Mensaje humano ("Algo salió mal"), opción Reintentar, y enlace a soporte si aplica
+
+#### Interacciones Modernas
+- **Drag-to-scroll**: Horizontal en carruseles (oculta scrollbar, agrega inercia)
+- **Deslizar para revelar**: Acciones en ítems (móvil)
+- **Gestos**: Pull-to-refresh opcional; toasts con swipe dismiss
+- **Acciones rápidas**: Cmd/Ctrl + K (Command Palette) si tu MVP lo amerita
+
+#### Accesibilidad + Lujo
+- **Focus visible premium**: Anillo doble (color + offset) coherente con accent
+- **Contraste**: AA mínimo; en dark evita texto puro blanco (usa off-white)
+- **ARIA**: En modales, listas dinámicas y toasts (role="alert", aria-live)
+- **Motion reduce**: Respeta prefers-reduced-motion, desactiva parallax/blur pesado
+
+#### Contenido y Microcopy
+- **Tono humano**: Directo, breve, útil. Títulos que expliquen el beneficio, no la sección
+- **CTA con verbo y resultado**: "Crear cotización", "Compartir enlace"
+- **Mensajes guiados**: Placeholders que enseñen (ej. formato, ejemplo)
+
+#### Innovación Responsable (Controlada)
+- **Gradientes "neo-luxe"**: 2–3 tonos vecinos, opacidad baja, usados en acento o highlights (no fondos completos)
+- **Glass-lite**: Sólo en overlays (backdrop blur 6–10px, bordes translúcidos)
+- **3D/Depth**: Sombras direccionadas muy suaves, highlights microscópicos (1px) en bordes superiores de cards
+- **Ilustraciones**: Monocromas con acento (evita caricaturas genéricas)
+
+### 11. Mockdata y Simulación de Backend
+
+#### Filosofía del Prototipo
+- **Sin backend real**: Todo el proyecto es un prototipo funcional sin conexión a base de datos o servidor
+- **Simulación completa**: Todos los métodos HTTP (GET, POST, PUT, DELETE) se simulan mediante localStorage
+- **Experiencia real**: El usuario debe sentir que está usando un sistema real con todas las operaciones funcionales
+- **Feedback visual**: Cada operación debe mostrar estados de carga, éxito y error para simular latencia de red
+
+#### Implementación de Métodos HTTP Simulados
+
+##### GET (Consultar datos)
+```typescript
+// Simular latencia de red (200-500ms)
+await new Promise(resolve => setTimeout(resolve, 300));
+// Leer de localStorage
+const data = localStorage.getItem('key');
+```
+
+##### POST (Crear datos)
+```typescript
+// Simular latencia de red (300-800ms)
+await new Promise(resolve => setTimeout(resolve, 400));
+// Generar ID único simulado
+const id = Date.now().toString();
+// Guardar en localStorage
+localStorage.setItem('key', JSON.stringify([...items, newItem]));
+```
+
+##### PUT (Actualizar datos)
+```typescript
+// Simular latencia de red (250-600ms)
+await new Promise(resolve => setTimeout(resolve, 350));
+// Actualizar item específico en localStorage
+localStorage.setItem('key', JSON.stringify(updatedItems));
+```
+
+##### DELETE (Eliminar datos)
+```typescript
+// Simular latencia de red (200-500ms)
+await new Promise(resolve => setTimeout(resolve, 300));
+// Filtrar y guardar en localStorage
+localStorage.setItem('key', JSON.stringify(filteredItems));
+```
+
+#### Reglas de Simulación
+- **Latencia variable**: Cada operación debe tener un delay aleatorio entre rangos razonables
+- **Estados de carga**: Mostrar spinners o skeletons durante la simulación de latencia
+- **Mensajes de éxito/error**: Desplegar toasts o notificaciones después de cada operación
+- **Validaciones**: Implementar validaciones del lado del cliente antes de simular la operación
+- **Consistencia**: Mantener la misma estructura de datos que tendría un backend real
+
+#### Estructura de Datos Mock
+- **Organización clara**: Cada entidad (empresas, usuarios, proyectos, etc.) debe tener su propia clave en localStorage
+- **Relaciones**: Mantener integridad referencial entre entidades simuladas
+- **Estado inicial**: Proporcionar datos mock iniciales para demostrar funcionalidad
+- **Reset funcional**: Implementar opción de resetear a datos iniciales
+
+#### Servicios de Simulación
+- **Archivos dedicados**: Crear archivos de servicio específicos para cada entidad (ej: `mockApi.service.ts`)
+- **Tipado estricto**: Usar TypeScript para mantener consistencia de tipos
+- **Manejo de errores**: Simular errores de red y validación cuando corresponda
+- **Logs opcionales**: Implementar logging para debugging si es necesario
+
+### 12. Estado de la Aplicación
+- **Estado global**: Usar Context API o estado local según la necesidad
+- **Persistencia**: Implementar persistencia de datos usando localStorage (NO backend real)
+- **Sincronización**: Mantener sincronizados los datos entre componentes reactivamente
+- **Cache local**: Los datos persistentes se mantienen en localStorage del navegador
+
+### 13. Arquitectura del Proyecto y Sistema de Almacenamiento
+
+#### Estructura de Carpetas
+- **Componentes UI**: `/components/ui/` - Componentes base reutilizables (botones, cards, inputs, etc.)
+- **Componentes específicos**: `/components/` - Componentes funcionales específicos del negocio
+- **Páginas**: `/app/` - Rutas de Next.js siguiendo App Router
+- **Hooks**: `/hooks/` - Hooks personalizados reutilizables
+- **Librerías**: `/lib/` - Utilidades, tipos, storage, y datos mock
+
+#### Reglas de Organización de Componentes
+- **CRÍTICO**: En `/app/` SOLO van archivos `page.tsx` y `layout.tsx`
+- **CRÍTICO**: NO crear componentes dentro de carpetas `/app/[ruta]/`
+- **Componentes generales**: Van en `/components/` (ej: theme-provider, mode-toggle, etc.)
+- **Componentes UI base**: Van en `/components/ui/` (botones, cards, inputs, etc.)
+- **Componentes por rol**: Crear carpeta `[rol]-components/` dentro de `/components/`
+  - Ejemplo: `/components/administradores-components/admin-dashboard.tsx`
+  - Ejemplo: `/components/pm-components/pm-sidebar.tsx`
+  - Ejemplo: `/components/colaboradores-components/colaborador-workspace.tsx`
+  - Ejemplo: `/components/oficina-central-components/control-panel.tsx`
+
+
+#### Sistema de StorageManager
+```typescript
+// Usar ProjectStorageManager para todas las operaciones CRUD
+class ProjectStorageManager<T> {
+  getAll(): T[]
+  getById(id: string): T | undefined
+  find(predicate): T[]
+  findOne(predicate): T | undefined
+  create(item: T): T
+  update(id: string, updates: Partial<T>): T | undefined
+  delete(id: string): boolean
+}
+
+// Instancias disponibles
+- empresasStorage
+- areasStorage
+- usuariosProyectosStorage
+- proyectosStorage
+- carpetasStorage
+- archivosStorage
+- actividadesStorage
+```
+
+#### Implementación de Métodos HTTP Simulados
+- **GET**: Consulta datos con latencia simulada (200-500ms)
+- **POST**: Crea nuevo registro con ID único, latencia (300-800ms)
+- **PUT**: Actualiza registro existente, latencia (250-600ms)
+- **DELETE**: Elimina registro, latencia (200-500ms)
+
+#### Patrón de Uso de Storage
+```typescript
+// Ejemplo de uso correcto
+import { proyectosStorage, generateProjectId, getCurrentTimestamp } from '@/lib/projectStorage';
+
+// GET - Consultar
+const proyectos = proyectosStorage.getAll();
+const proyecto = proyectosStorage.getById(id);
+
+// POST - Crear
+const nuevoProyecto = proyectosStorage.create({
+  id: generateProjectId('proj'),
+  nombre: 'Nuevo Proyecto',
+  estado: 'abierto',
+  empresaId: 'emp_001',
+  areasAsociadas: ['area_001'],
+  pmId: 'usr_002',
+  miembros: [],
+  fechaInicio: getCurrentTimestamp(),
+  fechaCreacion: getCurrentTimestamp(),
+  creadoPor: 'usr_001'
+});
+
+// PUT - Actualizar
+proyectosStorage.update(id, { estado: 'cerrado', fechaCierre: getCurrentTimestamp() });
+
+// DELETE - Eliminar
+proyectosStorage.delete(id);
+```
+
+#### Gestión de Data Mock
+- **Inicialización**: `initializeProjectData()` - Carga datos iniciales del proyecto
+- **Reset**: `resetProjectData()` - Restablece datos al estado inicial
+- **Servicios**: Crear servicios dedicados para cada entidad
+- **Storage keys**: Todas las claves usan prefijo 'proyectos_' (ej: 'proyectos_empresas', 'proyectos_proyectos')
+
+#### Paleta de Colores y Tema
+- **Color primario**: Teal sanitario (#0EA5A8 en light, #2DD4BF en dark)
+- **Colores de estado**: Success, Warning, Destructive, Info bien diferenciados
+- **Modo oscuro**: Implementado con variables CSS
+- **Sidebar**: Colores específicos para navegación lateral
+- **Variables CSS**: Usar siempre las definidas en `globals.css`
+
+#### Componentes UI Principales
+- **Button**: Variantes primary, secondary, ghost, danger
+- **Card**: Estructura visual para contenidos agrupados
+- **Input/Textarea**: Campos de formulario con validación
+- **Badge**: Estados y etiquetas
+- **Sidebar**: Navegación lateral principal
+- **Tabs**: Pestañas de contenido
+- **Dropdown-Menu**: Menús contextuales
+- **Sheet/Drawer**: Overlays laterales
+- **Modal/Dialog**: Diálogos modales
+- **Table**: Tablas de datos
+
+#### Autenticación y Sesiones
+- **localStorage**: Clave 'proyectos_session' para sesiones
+- **Roles**: admin, pm (Jefe de Proyecto), colaborador, oficina_central
+- **Rutas**: Cada rol tiene su ruta específica (/administradores, /pm, /colaborador, /oficina-central)
+- **Función**: `getRutaPorRol()` para redirección automática
+
+#### Inicialización del Sistema
+- **SystemInitializer**: Componente que inicializa datos mock al cargar
+- **initializeProjectData**: Función que carga datos de proyectos desde projectMockData
+- **ThemeProvider**: Gestiona tema claro/oscuro
+- **Geist Font**: Tipografía base del sistema
+
+#### Convenciones de Nomenclatura
+- **IDs**: Usar `generateProjectId(prefix)` con prefijo descriptivo
+- **Timestamps**: Usar `getCurrentTimestamp()` para ISO strings
+- **Estados**: Enums bien definidos (ej: 'abierto' | 'cerrado' | 'aprobado')
+- **Prefijos**: 'emp' (empresas), 'area' (áreas), 'proj' (proyectos), 'usr' (usuarios), 'carp' (carpetas), 'arch' (archivos), 'act' (actividades)
+
+## Documentación
+
+### 14. Documentación del Código
+- **README**: Mantener actualizada la documentación del proyecto
+- **Comentarios de código**: Documentar funciones complejas y lógica de negocio
+- **Props de componentes**: Documentar las props requeridas y opcionales
+- **Ejemplos de uso**: Proporcionar ejemplos de cómo usar los componentes
+
+## Cumplimiento
+
+### 15. Revisión de Código
+- **Auto-revisión**: Revisar el código antes de considerarlo completo
+- **Consistencia**: Verificar que el código siga estas reglas
+- **Mejora continua**: Buscar constantemente formas de mejorar el código
+- **Refactoring**: Refactorizar cuando sea necesario para cumplir estas reglas
+
+---
+
+**Nota**: Estas reglas deben ser seguidas en todo el desarrollo del proyecto para mantener la calidad, consistencia y mantenibilidad del código.
+description:
+globs:
+alwaysApply: false
+---
+
