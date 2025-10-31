@@ -28,9 +28,10 @@ import {
 } from '@/lib/projectStorage';
 import { getSession } from '@/lib/auth';
 import { toast } from 'sonner';
+import { Empresa } from '@/lib/projectTypes';
 
 export default function EmpresasPage() {
-  const [empresas, setEmpresas] = useState<any[]>([]);
+  const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({

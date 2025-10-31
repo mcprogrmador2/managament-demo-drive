@@ -35,14 +35,15 @@ import {
 } from '@/lib/projectStorage';
 import { getSession } from '@/lib/auth';
 import { toast } from 'sonner';
+import { Proyecto, Empresa, Usuario } from '@/lib/projectTypes';
 
 export default function ProyectosPage() {
   const router = useRouter();
-  const [proyectos, setProyectos] = useState<any[]>([]);
-  const [proyectosFiltrados, setProyectosFiltrados] = useState<any[]>([]);
-  const [empresas, setEmpresas] = useState<any[]>([]);
-  const [pms, setPms] = useState<any[]>([]);
-  const [usuarios, setUsuarios] = useState<any[]>([]);
+  const [proyectos, setProyectos] = useState<Proyecto[]>([]);
+  const [proyectosFiltrados, setProyectosFiltrados] = useState<Proyecto[]>([]);
+  const [empresas, setEmpresas] = useState<Empresa[]>([]);
+  const [pms, setPms] = useState<Usuario[]>([]);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,8 +59,8 @@ export default function ProyectosPage() {
     initializeProjectData();
     const dataProyectos = proyectosStorage.getAll();
     setProyectos(dataProyectos);
-    setEmpresas(empresasStorage.getAll().filter(e => e.activo));
-    setPms(usuariosProyectosStorage.getAll().filter(u => u.rol === 'pm' && u.activo));
+    setEmpresas(empresasStorage.getAll().filter((e: Empresa) => e.activo));
+    setPms(usuariosProyectosStorage.getAll().filter((u: Usuario) => u.rol === 'pm' && u.activo));
     setUsuarios(usuariosProyectosStorage.getAll());
   };
 
@@ -122,8 +123,8 @@ export default function ProyectosPage() {
       }
 
       // Obtener áreas asociadas a la empresa
-      const areas = areasStorage.find((area: any) => area.empresaId === formData.empresaId);
-      const areasAsociadas = areas.map((area: any) => area.id);
+      const areas = areasStorage.find((area: { empresaId: string }) => area.empresaId === formData.empresaId);
+      const areasAsociadas = areas.map((area: { id: string }) => area.id);
 
       proyectosStorage.create({
         id: generateProjectId('proj'),
@@ -151,12 +152,12 @@ export default function ProyectosPage() {
   };
 
   const getEmpresaNombre = (empresaId: string) => {
-    const empresa = empresas.find(e => e.id === empresaId);
+    const empresa = empresas.find((e: Empresa) => e.id === empresaId);
     return empresa?.nombre || 'Desconocida';
   };
 
   const getPMNombre = (pmId: string) => {
-    const pm = pms.find(p => p.id === pmId);
+    const pm = pms.find((p: Usuario) => p.id === pmId);
     return pm ? `${pm.nombre} ${pm.apellidos}` : 'Sin PM';
   };
 
@@ -173,12 +174,12 @@ export default function ProyectosPage() {
     }
   };
 
-  const getMiembrosPreview = (miembros: any[]) => {
+  const getMiembrosPreview = (miembros: Proyecto['miembros']) => {
     if (!miembros || miembros.length === 0) return 'Sin miembros';
     
     const miembroPreview = miembros.slice(0, 2);
-    return miembroPreview.map((m: any) => {
-      const usuario = usuarios.find(u => u.id === m.usuarioId);
+    return miembroPreview.map((m) => {
+      const usuario = usuarios.find((u: Usuario) => u.id === m.usuarioId);
       return usuario ? `${usuario.nombre} ${usuario.apellidos}` : 'Desconocido';
     }).join(', ');
   };

@@ -5,8 +5,7 @@ import {
   FolderOpen, 
   Plus, 
   Loader2,
-  X,
-  Building2
+  X
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,11 +24,12 @@ import {
 } from '@/lib/projectStorage';
 import { getSession } from '@/lib/auth';
 import { toast } from 'sonner';
+import { Area, Empresa, Usuario } from '@/lib/projectTypes';
 
 export default function AreasPage() {
-  const [areas, setAreas] = useState<any[]>([]);
-  const [empresas, setEmpresas] = useState<any[]>([]);
-  const [usuarios, setUsuarios] = useState<any[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
+  const [empresas, setEmpresas] = useState<Empresa[]>([]);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -42,8 +42,8 @@ export default function AreasPage() {
   const loadData = () => {
     initializeProjectData();
     setAreas(areasStorage.getAll());
-    setEmpresas(empresasStorage.getAll().filter(e => e.activo));
-    setUsuarios(usuariosProyectosStorage.getAll().filter(u => u.activo));
+    setEmpresas(empresasStorage.getAll().filter((e: Empresa) => e.activo));
+    setUsuarios(usuariosProyectosStorage.getAll().filter((u: Usuario) => u.activo));
   };
 
   useEffect(() => {
@@ -106,12 +106,12 @@ export default function AreasPage() {
   };
 
   const getEmpresaNombre = (empresaId: string) => {
-    const empresa = empresas.find((e: any) => e.id === empresaId);
+    const empresa = empresas.find((e: Empresa) => e.id === empresaId);
     return empresa?.nombre || 'Desconocida';
   };
 
   const getResponsableNombre = (responsableId: string) => {
-    const usuario = usuarios.find((u: any) => u.id === responsableId);
+    const usuario = usuarios.find((u: Usuario) => u.id === responsableId);
     return usuario ? `${usuario.nombre} ${usuario.apellidos}` : 'Sin responsable';
   };
 
@@ -159,7 +159,7 @@ export default function AreasPage() {
                       Responsable:
                     </span>
                     <Badge variant="outline" className="text-xs">
-                      {getResponsableNombre(area.responsableId)}
+                      {getResponsableNombre(area.responsableId || '')}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">

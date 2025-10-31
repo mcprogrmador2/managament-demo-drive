@@ -39,6 +39,7 @@ import { getSession } from '@/lib/auth';
 import { toast } from 'sonner';
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from 'recharts';
 import { ChartConfig, ChartContainer } from '@/components/ui/chart';
+import { Proyecto, Empresa, Usuario } from '@/lib/projectTypes';
 
 interface DashboardStats {
   totalEmpresas: number;
@@ -47,8 +48,8 @@ interface DashboardStats {
   proyectosAbiertos: number;
   proyectosCerrados: number;
   totalArchivos: number;
-  ultimosProyectos: any[];
-  distribucionEmpresas: any[];
+  ultimosProyectos: Proyecto[];
+  distribucionEmpresas: Array<{ empresa: string; proyectos: number }>;
 }
 
 export default function AdministradorDashboard() {
@@ -157,8 +158,8 @@ export default function AdministradorDashboard() {
       }
 
       // Obtener áreas asociadas a la empresa
-      const areas = areasStorage.find((area: any) => area.empresaId === formData.empresaId);
-      const areasAsociadas = areas.map((area: any) => area.id);
+      const areas = areasStorage.find((area: { empresaId: string }) => area.empresaId === formData.empresaId);
+      const areasAsociadas = areas.map((area: { id: string }) => area.id);
 
       // Crear el proyecto
       const nuevoProyecto = proyectosStorage.create({
@@ -187,8 +188,8 @@ export default function AdministradorDashboard() {
   };
 
   // Obtener datos para los selectores
-  const empresas = empresasStorage.getAll().filter(e => e.activo);
-  const pms = usuariosProyectosStorage.getAll().filter(u => u.rol === 'pm' && u.activo);
+  const empresas = empresasStorage.getAll().filter((e: Empresa) => e.activo);
+  const pms = usuariosProyectosStorage.getAll().filter((u: Usuario) => u.rol === 'pm' && u.activo);
 
   return (
     <div className="min-h-screen bg-background">

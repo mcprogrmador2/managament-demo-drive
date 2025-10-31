@@ -61,18 +61,22 @@ import {
 } from '@/lib/projectStorage';
 import { toast } from 'sonner';
 import { getSession } from '@/lib/auth';
+import { Proyecto, Carpeta, Archivo, Actividad, Empresa, Usuario } from '@/lib/projectTypes';
+
+// Tipo extendido para miembros del proyecto
+type UsuarioConRol = Usuario & { rolProyecto?: 'pm' | 'colaborador' | 'lector' };
 
 export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
   const projectId = params.name as string;
 
-  const [proyecto, setProyecto] = useState<any>(null);
-  const [carpetas, setCarpetas] = useState<any[]>([]);
-  const [archivos, setArchivos] = useState<any[]>([]);
-  const [actividades, setActividades] = useState<any[]>([]);
-  const [miembros, setMiembros] = useState<any[]>([]);
-  const [empresa, setEmpresa] = useState<any>(null);
+  const [proyecto, setProyecto] = useState<Proyecto | null>(null);
+  const [carpetas, setCarpetas] = useState<Carpeta[]>([]);
+  const [archivos, setArchivos] = useState<Archivo[]>([]);
+  const [actividades, setActividades] = useState<Actividad[]>([]);
+  const [miembros, setMiembros] = useState<UsuarioConRol[]>([]);
+  const [empresa, setEmpresa] = useState<Empresa | null>(null);
   const [loading, setLoading] = useState(true);
   
   // Estados para el modal de subida
@@ -91,7 +95,7 @@ export default function ProjectDetailPage() {
     usuarioId: '',
     rol: ''
   });
-  const [allUsuarios, setAllUsuarios] = useState<any[]>([]);
+  const [allUsuarios, setAllUsuarios] = useState<Usuario[]>([]);
 
   // Estados para vista en árbol
   const [openFolders, setOpenFolders] = useState<Set<string>>(new Set());
@@ -115,33 +119,36 @@ export default function ProjectDetailPage() {
 
     // Cargar empresa
     const emp = empresasStorage.getById(proj.empresaId);
-    setEmpresa(emp);
+    setEmpresa(emp || null);
 
     // Cargar carpetas del proyecto
-    const carpetas = carpetasStorage.find((carp: any) => carp.proyectoId === projectId);
-    setCarpetas(carpetas);
+    const carpetasList = carpetasStorage.find((carp: Carpeta) => carp.proyectoId === projectId);
+    setCarpetas(carpetasList);
 
     // Cargar archivos de las carpetas
-    const carpetasIds = carpetas.map((c: any) => c.id);
-    const archivosList = archivosStorage.find((arch: any) => carpetasIds.includes(arch.carpetaId));
+    const carpetasIds = carpetasList.map((c: Carpeta) => c.id);
+    const archivosList = archivosStorage.find((arch: Archivo) => carpetasIds.includes(arch.carpetaId));
     setArchivos(archivosList);
 
     // Cargar actividades del proyecto
-    const actividadesList = actividadesStorage.find((act: any) => act.proyectoId === projectId);
-    setActividades(actividadesList.sort((a: any, b: any) => 
+    const actividadesList = actividadesStorage.find((act: Actividad) => act.proyectoId === projectId);
+    setActividades(actividadesList.sort((a: Actividad, b: Actividad) => 
       new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime()
     ));
 
     // Cargar miembros
     const miembrosList = proj.miembros || [];
-    const usuariosCompletos = miembrosList.map((m: any) => {
+    const usuariosCompletos: UsuarioConRol[] = [];
+    for (const m of miembrosList) {
       const usuario = usuariosProyectosStorage.getById(m.usuarioId);
-      return { ...usuario, rolProyecto: m.rol };
-    });
-    setMiembros(usuariosCompletos.filter(Boolean));
+      if (usuario) {
+        usuariosCompletos.push({ ...usuario, rolProyecto: m.rol });
+      }
+    }
+    setMiembros(usuariosCompletos);
 
     // Cargar todos los usuarios disponibles
-    const usuarios = usuariosProyectosStorage.getAll().filter((u: any) => u.activo);
+    const usuarios = usuariosProyectosStorage.getAll().filter((u: Usuario) => u.activo);
     setAllUsuarios(usuarios);
 
     setLoading(false);
@@ -200,12 +207,12 @@ export default function ProjectDetailPage() {
     }
   };
 
-  const handleDescargarArchivo = (archivo: any) => {
+  const handleDescargarArchivo = (archivo: Archivo) => {
     toast.success(`Descargando ${archivo.nombreOriginal}...`);
   };
 
   const handleOpenUploadModal = () => {
-    if (proyecto.estado === 'cerrado') {
+    if (!proyecto || proyecto.estado === 'cerrado') {
       toast.error('No se pueden subir archivos a proyectos cerrados');
       return;
     }
@@ -328,8 +335,13 @@ export default function ProjectDetailPage() {
       return;
     }
 
+    if (!proyecto) {
+      toast.error('Proyecto no disponible');
+      return;
+    }
+
     // Verificar si el usuario ya está en el proyecto
-    const miembrosIds = proyecto.miembros?.map((m: any) => m.usuarioId) || [];
+    const miembrosIds = proyecto.miembros?.map((m) => m.usuarioId) || [];
     if (miembrosIds.includes(memberFormData.usuarioId)) {
       toast.error('Este usuario ya está en el equipo del proyecto');
       return;
@@ -354,7 +366,7 @@ export default function ProjectDetailPage() {
       // Agregar miembro al proyecto
       const nuevosMiembros = [...(proyecto.miembros || []), {
         usuarioId: memberFormData.usuarioId,
-        rol: memberFormData.rol,
+        rol: memberFormData.rol as 'pm' | 'colaborador' | 'lector',
         areaId: areaId,
         fechaAsignacion: getCurrentTimestamp()
       }];
@@ -384,6 +396,11 @@ export default function ProjectDetailPage() {
   };
 
   const handleChangeRol = async (usuarioId: string, nuevoRol: string) => {
+    if (!proyecto) {
+      toast.error('Proyecto no disponible');
+      return;
+    }
+
     setMemberLoading(true);
     await new Promise(resolve => setTimeout(resolve, 400));
 
@@ -396,8 +413,8 @@ export default function ProjectDetailPage() {
       }
 
       // Actualizar rol del miembro
-      const miembrosActualizados = proyecto.miembros.map((m: any) => 
-        m.usuarioId === usuarioId ? { ...m, rol: nuevoRol } : m
+      const miembrosActualizados = proyecto.miembros.map((m) => 
+        m.usuarioId === usuarioId ? { ...m, rol: nuevoRol as 'pm' | 'colaborador' | 'lector' } : m
       );
 
       proyectosStorage.update(projectId, { miembros: miembrosActualizados });
@@ -425,6 +442,11 @@ export default function ProjectDetailPage() {
   };
 
   const handleRemoveMember = async (usuarioId: string) => {
+    if (!proyecto) {
+      toast.error('Proyecto no disponible');
+      return;
+    }
+
     if (!confirm('¿Estás seguro de remover a este miembro del proyecto?')) {
       return;
     }
@@ -441,7 +463,7 @@ export default function ProjectDetailPage() {
       }
 
       // Remover miembro del proyecto
-      const miembrosActualizados = proyecto.miembros.filter((m: any) => m.usuarioId !== usuarioId);
+      const miembrosActualizados = proyecto.miembros.filter((m) => m.usuarioId !== usuarioId);
       proyectosStorage.update(projectId, { miembros: miembrosActualizados });
 
       // Crear actividad
@@ -538,13 +560,13 @@ export default function ProjectDetailPage() {
 
   // Función para obtener carpetas raíz (sin padre)
   const getRootFolders = () => {
-    return carpetas.filter((carpeta: any) => !carpeta.padreId);
+    return carpetas.filter((carpeta: Carpeta) => !carpeta.padreId);
   };
 
   // Función para renderizar carpeta simple con archivos
-  const renderFolder = (carpeta: any) => {
+  const renderFolder = (carpeta: Carpeta) => {
     const isOpen = openFolders.has(carpeta.id);
-    const archivosCarpeta = archivos.filter((arch: any) => arch.carpetaId === carpeta.id);
+    const archivosCarpeta = archivos.filter((arch: Archivo) => arch.carpetaId === carpeta.id);
 
     return (
       <div key={carpeta.id} className="border border-border rounded-lg overflow-hidden">
@@ -580,7 +602,7 @@ export default function ProjectDetailPage() {
             <div className="border-t border-border bg-muted/20">
               {archivosCarpeta.length > 0 ? (
                 <div className="p-4 space-y-1">
-                  {archivosCarpeta.map((archivo: any) => (
+                  {archivosCarpeta.map((archivo: Archivo) => (
                     <div
                       key={archivo.id}
                       className="flex items-center gap-3 p-3 rounded-md hover:bg-background transition-colors cursor-pointer group border border-border/50"
@@ -732,7 +754,7 @@ export default function ProjectDetailPage() {
 
             {carpetas.length > 0 ? (
               <div className="space-y-2">
-                {carpetas.map((carpeta: any) => renderFolder(carpeta))}
+                {carpetas.map((carpeta: Carpeta) => renderFolder(carpeta))}
               </div>
             ) : (
               <div className="text-center py-16 text-muted-foreground">
@@ -757,7 +779,7 @@ export default function ProjectDetailPage() {
 
             {miembros.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {miembros.map((miembro: any) => (
+                {miembros.map((miembro: UsuarioConRol) => (
                   <Card key={miembro.id} className="border-primary/20 hover:border-primary/40 transition-all">
                     <CardContent className="pt-6">
                       <div className="flex items-start gap-3">
@@ -836,7 +858,7 @@ export default function ProjectDetailPage() {
           <TabsContent value="actividad" className="space-y-4">
             {actividades.length > 0 ? (
               <div className="space-y-4">
-                {actividades.map((actividad: any) => {
+                {actividades.map((actividad: Actividad) => {
                   const usuario = usuariosProyectosStorage.getById(actividad.usuarioId);
                   const ActivityIcon = getActivityIcon(actividad.tipo);
                   const activityColors = getActivityColor(actividad.tipo);
@@ -943,7 +965,7 @@ export default function ProjectDetailPage() {
                         </SelectTrigger>
                         <SelectContent>
                           {allUsuarios
-                            .filter((u: any) => !miembros.some((m: any) => m.id === u.id))
+                            .filter((u: Usuario) => !miembros.some((m: Usuario) => m.id === u.id))
                             .map((usuario) => (
                               <SelectItem key={usuario.id} value={usuario.id}>
                                 {usuario.nombre} {usuario.apellidos} (@{usuario.username})

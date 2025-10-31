@@ -25,9 +25,10 @@ import {
 } from '@/lib/projectStorage';
 import { getSession } from '@/lib/auth';
 import { toast } from 'sonner';
+import { Usuario } from '@/lib/projectTypes';
 
 export default function TrabajadoresPage() {
-  const [usuarios, setUsuarios] = useState<any[]>([]);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
