@@ -47,8 +47,8 @@ interface DashboardStats {
   proyectosAbiertos: number;
   proyectosCerrados: number;
   totalArchivos: number;
-  ultimosProyectos: unknown[];
-  distribucionEmpresas: unknown[];
+  ultimosProyectos: any[];
+  distribucionEmpresas: any[];
 }
 
 export default function AdministradorDashboard() {

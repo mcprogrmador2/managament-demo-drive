@@ -30,7 +30,7 @@ import { getSession } from '@/lib/auth';
 import { toast } from 'sonner';
 
 export default function EmpresasPage() {
-  const [empresas, setEmpresas] = useState<unknown[]>([]);
+  const [empresas, setEmpresas] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -109,7 +109,7 @@ export default function EmpresasPage() {
     }
   };
 
-  return (
+    return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 sm:px-6 py-6">
         {/* Header */}
@@ -134,7 +134,7 @@ export default function EmpresasPage() {
                     <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
                       <Building2 className="w-6 h-6 text-primary" />
                     </div>
-                    <div>
+        <div>
                       <CardTitle className="text-lg">{empresa.nombre}</CardTitle>
                       {empresa.nit && (
                         <p className="text-xs text-muted-foreground mt-1">NIT: {empresa.nit}</p>

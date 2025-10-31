@@ -93,7 +93,7 @@ export interface Archivo {
   subidoPor: string;
   fechaSubida: string;
   fechaModificacion: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, string | number | boolean | null>;
 }
 
 export interface Actividad {
@@ -102,7 +102,7 @@ export interface Actividad {
   tipo: 'proyecto_creado' | 'archivo_subido' | 'carpeta_creada' | 'miembro_agregado' | 'proyecto_cerrado' | 'proyecto_aprobado' | 'comentario';
   usuarioId: string;
   descripcion: string;
-  detalles?: Record<string, any>;
+  detalles?: Record<string, string | number | boolean | null>;
   fechaCreacion: string;
 }
 
