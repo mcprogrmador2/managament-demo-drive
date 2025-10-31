@@ -290,8 +290,116 @@ proyectosStorage.delete(id);
 - **Servicios**: Crear servicios dedicados para cada entidad
 - **Storage keys**: Todas las claves usan prefijo 'proyectos_' (ej: 'proyectos_empresas', 'proyectos_proyectos')
 
+#### Patrón de Implementación de Modales
+- **Estructura visual**: Modal con backdrop blur, Card principal con shadow-2xl, border-primary/20
+- **Estados**: `isModalOpen`, `loading`, `formData` como estados locales del componente
+- **Funciones handler**:
+  - `handleOpenModal()`: Setea `isModalOpen` a `true`
+  - `handleCloseModal()`: Cierra modal, limpia formData, reset loading
+  - `handleSubmit()`: Valida, simula POST, muestra toast, actualiza estado
+- **Sincronización**: Llama `loadStats()` después de operaciones exitosas para refrescar datos
+
+##### Ejemplo de Modal Completo
+```typescript
+// Estados
+const [isModalOpen, setIsModalOpen] = useState(false);
+const [loading, setLoading] = useState(false);
+const [formData, setFormData] = useState({ /* campos iniciales */ });
+
+// Handlers
+const handleOpenModal = () => setIsModalOpen(true);
+const handleCloseModal = () => {
+  setIsModalOpen(false);
+  setFormData({ /* reset */ });
+  setLoading(false);
+};
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  // Validación
+  if (!formData.nombre || !formData.empresaId) {
+    toast.error('Campos obligatorios faltantes');
+    return;
+  }
+
+  setLoading(true);
+  
+  // Simular POST (300-800ms)
+  await new Promise(resolve => setTimeout(resolve, 400));
+  
+  try {
+    const session = getSession();
+    if (!session) {
+      toast.error('No hay sesión activa');
+      return;
+    }
+    
+    // Crear con storage
+    storage.create({
+      id: generateProjectId('proj'),
+      ...formData,
+      fechaCreacion: getCurrentTimestamp(),
+      creadoPor: session.username
+    });
+    
+    toast.success('Registro creado exitosamente');
+    handleCloseModal();
+    loadStats(); // Refrescar datos
+  } catch (error) {
+    toast.error('Error al crear registro');
+  } finally {
+    setLoading(false);
+  }
+};
+
+// JSX del modal
+{isModalOpen && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={handleCloseModal}></div>
+    <div className="relative z-50 w-full max-w-2xl mx-4">
+      <Card className="border-primary/20 shadow-2xl">
+        <CardHeader className="border-b border-border">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-primary">
+              <Plus className="w-5 h-5" />
+              Título del Modal
+            </CardTitle>
+            <button onClick={handleCloseModal} className="text-muted-foreground hover:text-foreground">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </CardHeader>
+        <form onSubmit={handleSubmit}>
+          <CardContent className="p-6 space-y-4">
+            {/* Inputs del formulario */}
+          </CardContent>
+          <div className="border-t border-border p-6 flex justify-end gap-3">
+            <Button type="button" variant="outline" onClick={handleCloseModal} disabled={loading}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Creando...</> : 'Crear'}
+            </Button>
+          </div>
+        </form>
+      </Card>
+    </div>
+  </div>
+)}
+```
+
+##### Reglas del Modal
+- **Backdrop**: `bg-black/50 backdrop-blur-sm` con onClick para cerrar
+- **Posicionamiento**: `fixed inset-0 z-50` con flex centrado
+- **Card**: `border-primary/20 shadow-2xl`
+- **Header**: Border bottom, título con icono, botón X
+- **Footer**: Border top, botones alineados derecha
+- **Loading states**: Deshabilitar inputs durante carga
+- **Toasts**: Usar `toast.success()` y `toast.error()` para feedback
+
 #### Paleta de Colores y Tema
-- **Color primario**: Teal sanitario (#0EA5A8 en light, #2DD4BF en dark)
+- **Color primario**: Azul eléctrico (#0066FF en light, #60a5fa en dark)
 - **Colores de estado**: Success, Warning, Destructive, Info bien diferenciados
 - **Modo oscuro**: Implementado con variables CSS
 - **Sidebar**: Colores específicos para navegación lateral
