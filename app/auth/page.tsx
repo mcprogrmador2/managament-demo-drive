@@ -232,18 +232,7 @@ export default function AuthPage() {
                       <span className="text-muted-foreground">Admin:</span>
                       <span className="font-mono text-foreground">admin / admin123</span>
                     </li>
-                    <li className="flex justify-between items-center py-1">
-                      <span className="text-muted-foreground">Jefe Proyecto:</span>
-                      <span className="font-mono text-foreground">pm.gonzalez / pm123</span>
-                    </li>
-                    <li className="flex justify-between items-center py-1">
-                      <span className="text-muted-foreground">Colaborador:</span>
-                      <span className="font-mono text-foreground">c.rodriguez / col123</span>
-                    </li>
-                    <li className="flex justify-between items-center py-1">
-                      <span className="text-muted-foreground">Oficina Central:</span>
-                      <span className="font-mono text-foreground">control.central / control123</span>
-                    </li>
+                    
                   </ul>
                 </div>
               </form>
