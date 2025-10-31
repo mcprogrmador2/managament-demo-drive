@@ -44,8 +44,8 @@ export function AdministradorSidebar({ adminNombre, isCollapsed, onToggleCollaps
         path: "/administradores/proyectos"
       },
       {
-        title: "Usuarios",
-        onClick: () => router.push("/administradores/usuarios"),
+        title: "Trabajadores",
+        onClick: () => router.push("/administradores/trabajadores"),
         icon: Users,
         path: "/administradores/usuarios"
       },

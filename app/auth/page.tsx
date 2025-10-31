@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertCircle, Loader2, Briefcase } from 'lucide-react';
+import { AlertCircle, Loader2, Briefcase, User } from 'lucide-react';
 
 // Funciones de autenticación simuladas
 import { usuariosProyectosStorage, initializeProjectData } from '@/lib/projectStorage';
@@ -224,7 +224,7 @@ export default function AuthPage() {
 
                 <div className="mt-8 p-5 bg-accent/30 border border-accent/50 rounded-xl">
                   <p className="font-semibold mb-3 text-foreground text-sm flex items-center gap-2">
-                    <span className="w-5 h-5 bg-primary/20 rounded-full flex items-center justify-center text-xs">👤</span>
+                    <User className="w-5 h-5 text-primary" />
                     Usuarios de prueba:
                   </p>
                   <ul className="space-y-2 text-xs">
