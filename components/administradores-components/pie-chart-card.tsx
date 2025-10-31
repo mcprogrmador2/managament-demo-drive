@@ -15,6 +15,7 @@ interface PieChartData {
   name: string;
   value: number;
   fill: string;
+  [key: string]: any; 
 }
 
 interface PieChartCardProps {
