@@ -27,9 +27,9 @@ import { getSession } from '@/lib/auth';
 import { toast } from 'sonner';
 
 export default function AreasPage() {
-  const [areas, setAreas] = useState<any[]>([]);
-  const [empresas, setEmpresas] = useState<any[]>([]);
-  const [usuarios, setUsuarios] = useState<any[]>([]);
+  const [areas, setAreas] = useState<unknown[]>([]);
+  const [empresas, setEmpresas] = useState<unknown[]>([]);
+  const [usuarios, setUsuarios] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({

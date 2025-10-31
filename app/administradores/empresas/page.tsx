@@ -30,7 +30,7 @@ import { getSession } from '@/lib/auth';
 import { toast } from 'sonner';
 
 export default function EmpresasPage() {
-  const [empresas, setEmpresas] = useState<any[]>([]);
+  const [empresas, setEmpresas] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({

@@ -19,24 +19,28 @@ export default function AdministradorLayout({
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated()) {
-      router.push('/auth');
-      return;
-    }
+    const initAuth = async () => {
+      if (!isAuthenticated()) {
+        router.push('/auth');
+        return;
+      }
 
-    const session = getSession();
-    if (session?.rol !== 'admin') {
-      router.push('/auth');
-      return;
-    }
+      const session = getSession();
+      if (session?.rol !== 'admin') {
+        router.push('/auth');
+        return;
+      }
 
-    // Obtener nombre del admin
-    const usuario = usuariosProyectosStorage.getById(session.userId);
-    if (usuario) {
-      setAdminNombre(`${usuario.nombre} ${usuario.apellidos}`);
-    }
+      // Obtener nombre del admin
+      const usuario = usuariosProyectosStorage.getById(session.userId);
+      if (usuario) {
+        setAdminNombre(`${usuario.nombre} ${usuario.apellidos}`);
+      }
 
-    setLoading(false);
+      setLoading(false);
+    };
+
+    initAuth();
   }, [router]);
 
   if (loading) {
