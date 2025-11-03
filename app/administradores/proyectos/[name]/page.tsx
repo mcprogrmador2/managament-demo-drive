@@ -101,6 +101,10 @@ export default function ProjectDetailPage() {
     { id: null, nombre: 'Raíz' }
   ]);
 
+  // Estados para drag and drop
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOverCarpeta, setDragOverCarpeta] = useState<string | null>(null);
+
 
   useEffect(() => {
     loadProjectData();
@@ -616,6 +620,134 @@ export default function ProjectDetailPage() {
     setCarpetaActual(carpetaDestino.id);
   };
 
+  // Funciones para drag and drop
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Solo cambiar isDragging si salimos del contenedor principal
+    const target = e.currentTarget;
+    const relatedTarget = e.relatedTarget as Node;
+    if (!target.contains(relatedTarget)) {
+      setIsDragging(false);
+      setDragOverCarpeta(null);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragOverCarpeta = (e: React.DragEvent, carpetaId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOverCarpeta(carpetaId);
+  };
+
+  const handleDragLeaveCarpeta = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOverCarpeta(null);
+  };
+
+  const handleDrop = async (e: React.DragEvent, carpetaId: string | null) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    setIsDragging(false);
+    setDragOverCarpeta(null);
+
+    if (proyecto?.estado === 'cerrado') {
+      toast.error('No se pueden subir archivos a proyectos cerrados');
+      return;
+    }
+
+    // Si no hay carpetaId y estamos en la raíz, no permitir subir archivos
+    if (carpetaId === null) {
+      toast.error('Debes arrastrar los archivos a una carpeta específica');
+      return;
+    }
+
+    const files = Array.from(e.dataTransfer.files);
+    
+    if (files.length === 0) {
+      toast.error('No se detectaron archivos');
+      return;
+    }
+
+    // Limitar a 10 archivos por vez
+    if (files.length > 10) {
+      toast.error('Máximo 10 archivos por vez');
+      return;
+    }
+
+    const session = getSession();
+    if (!session) {
+      toast.error('No hay sesión activa');
+      return;
+    }
+
+    toast.info(`Subiendo ${files.length} archivo(s)...`);
+
+    // Simular subida de archivos
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    try {
+      let archivosSubidos = 0;
+
+      for (const file of files) {
+        const extension = file.name.split('.').pop() || 'file';
+        const nombre = file.name.replace(/\.[^/.]+$/, '').replace(/ /g, '_');
+        const tipoMime = file.type || getMimeType(extension);
+        
+        // Crear el archivo
+        archivosStorage.create({
+          id: generateProjectId('arch'),
+          carpetaId: carpetaId,
+          nombre: nombre,
+          nombreOriginal: file.name,
+          tipo: tipoMime,
+          tamaño: file.size,
+          extension: extension,
+          url: `/files/${nombre.toLowerCase()}.${extension}`,
+          version: 1,
+          estado: 'activo',
+          subidoPor: session.userId || session.username,
+          fechaSubida: getCurrentTimestamp(),
+          fechaModificacion: getCurrentTimestamp()
+        });
+
+        archivosSubidos++;
+      }
+
+      // Crear actividad
+      const usuario = usuariosProyectosStorage.getById(session.userId);
+      const carpetaNombre = carpetas.find(c => c.id === carpetaId)?.nombre || 'carpeta';
+      
+      actividadesStorage.create({
+        id: generateProjectId('act'),
+        proyectoId: projectId,
+        tipo: 'archivo_subido',
+        usuarioId: session.userId || session.username,
+        descripcion: `${usuario ? usuario.nombre : 'Usuario'} subió ${archivosSubidos} archivo(s) a ${carpetaNombre}`,
+        fechaCreacion: getCurrentTimestamp()
+      });
+
+      toast.success(`${archivosSubidos} archivo(s) subido(s) exitosamente`);
+      loadProjectData();
+    } catch (error) {
+      toast.error('Error al subir archivos');
+      console.error(error);
+    }
+  };
+
   // Función para renderizar vista de cuadrícula estilo Windows Explorer
   const renderGridView = () => {
     // Filtrar carpetas y archivos según la carpeta actual
@@ -640,7 +772,15 @@ export default function ProjectDetailPage() {
 
     if (items.length === 0) {
       return (
-        <div className="text-center py-16 text-muted-foreground">
+        <div 
+          className={`text-center py-16 text-muted-foreground min-h-[300px] flex flex-col items-center justify-center transition-all ${
+            isDragging && carpetaActual ? 'bg-primary/10 border-2 border-dashed border-primary rounded-lg' : ''
+          }`}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDragOver={handleDragOver}
+          onDrop={(e) => handleDrop(e, carpetaActual)}
+        >
           <div className="w-24 h-24 mx-auto mb-4 bg-primary/5 rounded-full flex items-center justify-center">
             <Folder className="w-12 h-12 text-primary/50" />
           </div>
@@ -648,29 +788,63 @@ export default function ProjectDetailPage() {
             {carpetaActual ? 'Esta carpeta está vacía' : 'No hay carpetas ni archivos en este proyecto'}
           </p>
           <p className="text-sm mb-6">
-            {carpetaActual ? 'No hay elementos en esta carpeta' : 'Los archivos aparecerán aquí cuando se suban'}
+            {carpetaActual 
+              ? isDragging 
+                ? 'Suelta los archivos aquí para subirlos' 
+                : 'Arrastra archivos aquí para subirlos'
+              : 'Los archivos aparecerán aquí cuando se suban'}
           </p>
         </div>
       );
     }
 
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4 p-6">
+      <div 
+        className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4 p-6 min-h-[300px] transition-all ${
+          isDragging && carpetaActual && !dragOverCarpeta ? 'bg-primary/5' : ''
+        }`}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={(e) => {
+          // Solo permitir drop en el fondo si estamos en una carpeta y no sobre otra carpeta
+          if (carpetaActual && !dragOverCarpeta) {
+            handleDrop(e, carpetaActual);
+          }
+        }}
+      >
         {items.map((item) => {
           if (item.type === 'folder') {
             const carpeta = item.data as Carpeta;
             const archivosCarpeta = archivos.filter(a => a.carpetaId === carpeta.id);
             const subcarpetas = carpetas.filter(c => c.padreId === carpeta.id);
             const totalElementos = archivosCarpeta.length + subcarpetas.length;
+            const isDropTarget = dragOverCarpeta === carpeta.id;
             
             return (
               <div
                 key={`folder-${carpeta.id}`}
-                className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-accent/50 transition-all cursor-pointer group"
-                onClick={() => handleAbrirCarpeta(carpeta)}
+                className={`flex flex-col items-center gap-2 p-3 rounded-lg transition-all cursor-pointer group relative ${
+                  isDropTarget 
+                    ? 'bg-primary/20 ring-2 ring-primary scale-105' 
+                    : 'hover:bg-accent/50'
+                }`}
+                onClick={(e) => {
+                  if (!isDragging) {
+                    handleAbrirCarpeta(carpeta);
+                  }
+                }}
+                onDragOver={(e) => handleDragOverCarpeta(e, carpeta.id)}
+                onDragLeave={handleDragLeaveCarpeta}
+                onDrop={(e) => handleDrop(e, carpeta.id)}
               >
+                {isDropTarget && (
+                  <div className="absolute inset-0 border-2 border-dashed border-primary rounded-lg pointer-events-none"></div>
+                )}
                 <div className="w-16 h-16 flex items-center justify-center">
-                  <Folder className="w-14 h-14 text-[#fbbf24] group-hover:scale-110 transition-transform" />
+                  <Folder className={`w-14 h-14 text-[#fbbf24] transition-transform ${
+                    isDropTarget ? 'scale-110' : 'group-hover:scale-110'
+                  }`} />
                 </div>
                 <div className="text-center w-full">
                   <p className="text-xs text-foreground font-medium truncate px-1">
@@ -680,6 +854,11 @@ export default function ProjectDetailPage() {
                     {totalElementos} {totalElementos === 1 ? 'elemento' : 'elementos'}
                   </p>
                 </div>
+                {isDropTarget && (
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap">
+                    Soltar aquí
+                  </div>
+                )}
               </div>
             );
           } else {
@@ -832,7 +1011,21 @@ export default function ProjectDetailPage() {
             )}
 
             {/* Vista de cuadrícula estilo Windows Explorer */}
-            <div className="bg-card border border-border rounded-xl overflow-hidden">
+            <div className={`bg-card border rounded-xl overflow-hidden transition-all ${
+              isDragging ? 'border-primary border-2 shadow-lg' : 'border-border'
+            }`}>
+              {/* Indicador de drag activo */}
+              {isDragging && (
+                <div className="bg-primary/10 border-b border-primary/30 px-4 py-2 flex items-center gap-2">
+                  <Upload className="w-4 h-4 text-primary animate-bounce" />
+                  <span className="text-sm text-primary font-medium">
+                    {carpetaActual 
+                      ? 'Arrastra los archivos a una carpeta o suéltalos aquí' 
+                      : 'Arrastra los archivos a una carpeta específica'}
+                  </span>
+                </div>
+              )}
+              
               {/* Barra de navegación / Breadcrumb */}
               <div className="border-b border-border bg-muted/30 px-4 py-3 flex items-center gap-2">
                 {/* Botón volver atrás */}
