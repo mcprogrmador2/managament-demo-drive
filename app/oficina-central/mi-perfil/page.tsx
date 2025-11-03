@@ -25,32 +25,33 @@ export default function MiPerfilPage() {
   });
 
   useEffect(() => {
-    loadUserData();
-  }, []);
+    const loadUserData = () => {
+      initializeProjectData();
+      const session = getSession();
+      
+      if (!session) {
+        toast.error('No hay sesión activa');
+        setLoading(false);
+        return;
+      }
 
-  const loadUserData = () => {
-    initializeProjectData();
-    const session = getSession();
-    
-    if (!session) {
-      toast.error('No hay sesión activa');
+      const user = usuariosProyectosStorage.getById(session.userId);
+      
+      if (user) {
+        setUsuario(user);
+        setFormData({
+          nombre: user.nombre,
+          apellidos: user.apellidos,
+          email: user.email,
+          telefono: user.telefono || ''
+        });
+      }
       setLoading(false);
-      return;
-    }
+    };
 
-    const user = usuariosProyectosStorage.getById(session.userId);
-    
-    if (user) {
-      setUsuario(user);
-      setFormData({
-        nombre: user.nombre,
-        apellidos: user.apellidos,
-        email: user.email,
-        telefono: user.telefono || ''
-      });
-    }
-    setLoading(false);
-  };
+    loadUserData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -84,8 +85,16 @@ export default function MiPerfilPage() {
       telefono: formData.telefono.trim()
     });
 
+    // Actualizar el estado local con los datos actualizados
+    setUsuario({
+      ...usuario,
+      nombre: formData.nombre.trim(),
+      apellidos: formData.apellidos.trim(),
+      email: formData.email.trim(),
+      telefono: formData.telefono.trim()
+    });
+
     toast.success('Perfil actualizado correctamente');
-    loadUserData();
     setIsEditing(false);
   };
 

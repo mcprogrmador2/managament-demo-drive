@@ -63,83 +63,84 @@ export default function OficinaCentralDashboard() {
   });
 
   useEffect(() => {
-    loadDashboardData();
-  }, []);
-
-  const loadDashboardData = () => {
-    initializeProjectData();
-    const session = getSession();
-    
-    if (!session) {
-      router.push('/auth');
-      return;
-    }
-
-    const usuario = usuariosProyectosStorage.getById(session.userId);
-    
-    if (!usuario) {
-      router.push('/auth');
-      return;
-    }
-
-    // Obtener proyectos cerrados
-    const proyectos = proyectosStorage.getAll();
-    const proyectosCerrados = proyectos.filter(p => p.estado === 'cerrado' || p.estado === 'aprobado');
-
-    // Obtener carpetas marcadas como "final" o "Documento Final"
-    const carpetas = carpetasStorage.getAll();
-    const carpetasFinales = carpetas.filter(
-      c => c.restricciones.tipo === 'final' || c.nombre.toLowerCase().includes('final')
-    );
-
-    // Calcular documentos finales (carpetas finales en proyectos cerrados)
-    const documentosFinales: Array<{
-      proyecto: Proyecto;
-      empresa: Empresa;
-      carpeta: Carpeta;
-      archivos: Archivo[];
-    }> = [];
-
-    carpetasFinales.forEach((carpeta) => {
-      const proyecto = proyectosCerrados.find(p => p.id === carpeta.proyectoId);
-      if (proyecto) {
-        const empresa = empresasStorage.getById(proyecto.empresaId);
-        const archivos = archivosStorage.getAll().filter(a => a.carpetaId === carpeta.id && a.estado === 'activo');
-        
-        if (empresa) {
-          documentosFinales.push({
-            proyecto,
-            empresa,
-            carpeta,
-            archivos
-          });
-        }
+    const loadDashboardData = () => {
+      initializeProjectData();
+      const session = getSession();
+      
+      if (!session) {
+        router.push('/auth');
+        return;
       }
-    });
 
-    // Calcular empresas únicas
-    const empresasIds = new Set(documentosFinales.map(d => d.empresa.id));
-    const empresasRevisadas = empresasIds.size;
+      const usuario = usuariosProyectosStorage.getById(session.userId);
+      
+      if (!usuario) {
+        router.push('/auth');
+        return;
+      }
 
-    // Total de archivos en documentos finales
-    const totalArchivos = documentosFinales.reduce((acc, doc) => acc + doc.archivos.length, 0);
+      // Obtener proyectos cerrados
+      const proyectos = proyectosStorage.getAll();
+      const proyectosCerrados = proyectos.filter(p => p.estado === 'cerrado' || p.estado === 'aprobado');
 
-    // Obtener últimos documentos (ordenados por fecha)
-    const ultimosDocumentos = documentosFinales
-      .sort((a, b) => new Date(b.proyecto.fechaCreacion).getTime() - new Date(a.proyecto.fechaCreacion).getTime())
-      .slice(0, 5);
+      // Obtener carpetas marcadas como "final" o "Documento Final"
+      const carpetas = carpetasStorage.getAll();
+      const carpetasFinales = carpetas.filter(
+        c => c.restricciones.tipo === 'final' || c.nombre.toLowerCase().includes('final')
+      );
 
-    setStats({
-      usuarioActual: usuario,
-      proyectosCerrados: proyectosCerrados.length,
-      totalDocumentos: documentosFinales.length,
-      totalArchivos,
-      empresasRevisadas,
-      ultimosDocumentos
-    });
+      // Calcular documentos finales (carpetas finales en proyectos cerrados)
+      const documentosFinales: Array<{
+        proyecto: Proyecto;
+        empresa: Empresa;
+        carpeta: Carpeta;
+        archivos: Archivo[];
+      }> = [];
 
-    setLoading(false);
-  };
+      carpetasFinales.forEach((carpeta) => {
+        const proyecto = proyectosCerrados.find(p => p.id === carpeta.proyectoId);
+        if (proyecto) {
+          const empresa = empresasStorage.getById(proyecto.empresaId);
+          const archivos = archivosStorage.getAll().filter(a => a.carpetaId === carpeta.id && a.estado === 'activo');
+          
+          if (empresa) {
+            documentosFinales.push({
+              proyecto,
+              empresa,
+              carpeta,
+              archivos
+            });
+          }
+        }
+      });
+
+      // Calcular empresas únicas
+      const empresasIds = new Set(documentosFinales.map(d => d.empresa.id));
+      const empresasRevisadas = empresasIds.size;
+
+      // Total de archivos en documentos finales
+      const totalArchivos = documentosFinales.reduce((acc, doc) => acc + doc.archivos.length, 0);
+
+      // Obtener últimos documentos (ordenados por fecha)
+      const ultimosDocumentos = documentosFinales
+        .sort((a, b) => new Date(b.proyecto.fechaCreacion).getTime() - new Date(a.proyecto.fechaCreacion).getTime())
+        .slice(0, 5);
+
+      setStats({
+        usuarioActual: usuario,
+        proyectosCerrados: proyectosCerrados.length,
+        totalDocumentos: documentosFinales.length,
+        totalArchivos,
+        empresasRevisadas,
+        ultimosDocumentos
+      });
+
+      setLoading(false);
+    };
+
+    loadDashboardData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleVerDocumento = (documento: { proyecto: Proyecto; empresa: Empresa; carpeta: Carpeta }) => {
     router.push(`/administradores/proyectos/${documento.proyecto.id}`);

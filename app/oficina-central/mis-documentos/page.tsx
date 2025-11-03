@@ -52,76 +52,77 @@ export default function MisDocumentosPage() {
   const [empresaFilter, setEmpresaFilter] = useState<string>('todas');
 
   useEffect(() => {
+    const loadDocumentos = () => {
+      setLoading(true);
+      initializeProjectData();
+
+      const proyectos = proyectosStorage.getAll();
+      const carpetas = carpetasStorage.getAll();
+      const archivos = archivosStorage.getAll();
+      const empresas = empresasStorage.getAll();
+
+      // Filtrar solo carpetas marcadas como "final" o "Documento Final"
+      const carpetasFinales = carpetas.filter(
+        c => c.restricciones.tipo === 'final' || c.nombre.toLowerCase().includes('final')
+      );
+
+      const documentosFinales: DocumentoFinal[] = [];
+
+      carpetasFinales.forEach((carpeta) => {
+        const proyecto = proyectos.find(p => p.id === carpeta.proyectoId);
+        if (proyecto && (proyecto.estado === 'cerrado' || proyecto.estado === 'aprobado')) {
+          const empresa = empresas.find(e => e.id === proyecto.empresaId);
+          const archivosEnCarpeta = archivos.filter(a => a.carpetaId === carpeta.id && a.estado === 'activo');
+
+          if (empresa) {
+            documentosFinales.push({
+              proyecto,
+              empresa,
+              carpeta,
+              archivos: archivosEnCarpeta
+            });
+          }
+        }
+      });
+
+      setDocumentos(documentosFinales);
+      setLoading(false);
+    };
+
     loadDocumentos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
+    const filterDocumentos = () => {
+      let filtered = [...documentos];
+
+      // Filtrar por búsqueda
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        filtered = filtered.filter(
+          doc =>
+            doc.proyecto.nombre.toLowerCase().includes(term) ||
+            doc.empresa.nombre.toLowerCase().includes(term) ||
+            doc.carpeta.nombre.toLowerCase().includes(term)
+        );
+      }
+
+      // Filtrar por estado
+      if (estadoFilter !== 'todos') {
+        filtered = filtered.filter(doc => doc.proyecto.estado === estadoFilter);
+      }
+
+      // Filtrar por empresa
+      if (empresaFilter !== 'todas') {
+        filtered = filtered.filter(doc => doc.empresa.id === empresaFilter);
+      }
+
+      setFilteredDocumentos(filtered);
+    };
+
     filterDocumentos();
   }, [documentos, searchTerm, estadoFilter, empresaFilter]);
-
-  const loadDocumentos = () => {
-    setLoading(true);
-    initializeProjectData();
-
-    const proyectos = proyectosStorage.getAll();
-    const carpetas = carpetasStorage.getAll();
-    const archivos = archivosStorage.getAll();
-    const empresas = empresasStorage.getAll();
-
-    // Filtrar solo carpetas marcadas como "final" o "Documento Final"
-    const carpetasFinales = carpetas.filter(
-      c => c.restricciones.tipo === 'final' || c.nombre.toLowerCase().includes('final')
-    );
-
-    const documentosFinales: DocumentoFinal[] = [];
-
-    carpetasFinales.forEach((carpeta) => {
-      const proyecto = proyectos.find(p => p.id === carpeta.proyectoId);
-      if (proyecto && proyecto.estado === 'cerrado') {
-        const empresa = empresas.find(e => e.id === proyecto.empresaId);
-        const archivosEnCarpeta = archivos.filter(a => a.carpetaId === carpeta.id && a.estado === 'activo');
-
-        if (empresa) {
-          documentosFinales.push({
-            proyecto,
-            empresa,
-            carpeta,
-            archivos: archivosEnCarpeta
-          });
-        }
-      }
-    });
-
-    setDocumentos(documentosFinales);
-    setLoading(false);
-  };
-
-  const filterDocumentos = () => {
-    let filtered = [...documentos];
-
-    // Filtrar por búsqueda
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        doc =>
-          doc.proyecto.nombre.toLowerCase().includes(term) ||
-          doc.empresa.nombre.toLowerCase().includes(term) ||
-          doc.carpeta.nombre.toLowerCase().includes(term)
-      );
-    }
-
-    // Filtrar por estado
-    if (estadoFilter !== 'todos') {
-      filtered = filtered.filter(doc => doc.proyecto.estado === estadoFilter);
-    }
-
-    // Filtrar por empresa
-    if (empresaFilter !== 'todas') {
-      filtered = filtered.filter(doc => doc.empresa.id === empresaFilter);
-    }
-
-    setFilteredDocumentos(filtered);
-  };
 
   const handleDescargar = (documento: DocumentoFinal) => {
     toast.success(`Descargando documentos de "${documento.proyecto.nombre}"`);
