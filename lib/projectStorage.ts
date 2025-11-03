@@ -7,7 +7,8 @@ import {
   Proyecto,
   Carpeta,
   Archivo,
-  Actividad
+  Actividad,
+  InvitacionExterna
 } from './projectTypes';
 import {
   empresasMock,
@@ -92,6 +93,7 @@ export const proyectosStorage = new ProjectStorageManager<Proyecto>('proyectos_p
 export const carpetasStorage = new ProjectStorageManager<Carpeta>('proyectos_carpetas');
 export const archivosStorage = new ProjectStorageManager<Archivo>('proyectos_archivos');
 export const actividadesStorage = new ProjectStorageManager<Actividad>('proyectos_actividades');
+export const invitacionesExternasStorage = new ProjectStorageManager<InvitacionExterna>('proyectos_invitaciones_externas');
 
 // Funciones de utilidad
 export function generateProjectId(prefix: string): string {
@@ -146,6 +148,7 @@ export function resetProjectData() {
   localStorage.removeItem('proyectos_carpetas');
   localStorage.removeItem('proyectos_archivos');
   localStorage.removeItem('proyectos_actividades');
+  localStorage.removeItem('proyectos_invitaciones_externas');
   initializeProjectData();
 }
 

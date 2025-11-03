@@ -27,13 +27,18 @@ import {
   Sparkles,
   ChevronRight,
   Home,
-  FolderPlus
+  FolderPlus,
+  Share2,
+  Mail,
+  Check,
+  Search
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
@@ -54,6 +59,7 @@ import {
   actividadesStorage,
   usuariosProyectosStorage,
   empresasStorage,
+  invitacionesExternasStorage,
   initializeProjectData,
   generateProjectId,
   getCurrentTimestamp
@@ -114,6 +120,22 @@ export default function ProjectDetailPage() {
     nombre: '',
     descripcion: ''
   });
+
+  // Estados para compartir carpeta
+  const [carpetaSeleccionada, setCarpetaSeleccionada] = useState<Carpeta | null>(null);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shareLoading, setShareLoading] = useState(false);
+  const [shareFormData, setShareFormData] = useState({
+    email: '',
+    tipoAcceso: 'lectura' as 'lectura' | 'escritura',
+    mensaje: ''
+  });
+
+  // Estados para gestionar permisos de carpeta
+  const [isPermissionsModalOpen, setIsPermissionsModalOpen] = useState(false);
+  const [permissionsLoading, setPermissionsLoading] = useState(false);
+  const [searchUsuario, setSearchUsuario] = useState('');
+  const [usuariosConPermisos, setUsuariosConPermisos] = useState<string[]>([]);
 
 
   useEffect(() => {
@@ -722,6 +744,184 @@ export default function ProjectDetailPage() {
     }
   };
 
+  // Funciones para compartir carpeta
+  const handleOpenShareModal = (carpeta: Carpeta) => {
+    setCarpetaSeleccionada(carpeta);
+    setIsShareModalOpen(true);
+  };
+
+  const handleCloseShareModal = () => {
+    setIsShareModalOpen(false);
+    setCarpetaSeleccionada(null);
+    setShareFormData({
+      email: '',
+      tipoAcceso: 'lectura',
+      mensaje: ''
+    });
+    setShareLoading(false);
+  };
+
+  const handleShareFolder = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!shareFormData.email.trim()) {
+      toast.error('El correo electrónico es obligatorio');
+      return;
+    }
+
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(shareFormData.email.trim())) {
+      toast.error('El correo electrónico no es válido');
+      return;
+    }
+
+    if (!carpetaSeleccionada) {
+      toast.error('No se ha seleccionado ninguna carpeta');
+      return;
+    }
+
+    setShareLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 600));
+
+    try {
+      const session = getSession();
+      if (!session) {
+        toast.error('No hay sesión activa');
+        setShareLoading(false);
+        return;
+      }
+
+      // Generar token único para acceso
+      const token = `token_${Date.now()}_${Math.random().toString(36).substr(2, 16)}`;
+      
+      // Fecha de expiración (30 días)
+      const fechaExpiracion = new Date();
+      fechaExpiracion.setDate(fechaExpiracion.getDate() + 30);
+
+      // Crear invitación externa
+      invitacionesExternasStorage.create({
+        id: generateProjectId('inv'),
+        carpetaId: carpetaSeleccionada.id,
+        proyectoId: projectId,
+        email: shareFormData.email.trim(),
+        tipoAcceso: shareFormData.tipoAcceso,
+        estado: 'pendiente',
+        token: token,
+        fechaExpiracion: fechaExpiracion.toISOString(),
+        fechaCreacion: getCurrentTimestamp(),
+        creadoPor: session.userId || session.username,
+        mensaje: shareFormData.mensaje.trim() || undefined
+      });
+
+      // Crear actividad
+      const usuario = usuariosProyectosStorage.getById(session.userId);
+      actividadesStorage.create({
+        id: generateProjectId('act'),
+        proyectoId: projectId,
+        tipo: 'comentario',
+        usuarioId: session.userId || session.username,
+        descripcion: `${usuario ? usuario.nombre : 'Usuario'} compartió la carpeta "${carpetaSeleccionada.nombre}" con ${shareFormData.email}`,
+        fechaCreacion: getCurrentTimestamp()
+      });
+
+      toast.success(`Invitación enviada a ${shareFormData.email}`);
+      handleCloseShareModal();
+      loadProjectData();
+    } catch (error) {
+      toast.error('Error al compartir carpeta');
+      console.error(error);
+    } finally {
+      setShareLoading(false);
+    }
+  };
+
+  // Funciones para gestionar permisos de carpeta
+  const handleOpenPermissionsModal = (carpeta: Carpeta) => {
+    setCarpetaSeleccionada(carpeta);
+    
+    // Cargar usuarios con permisos actuales
+    const usuariosPermitidos = carpeta.restricciones.usuariosPermitidos || [];
+    setUsuariosConPermisos(usuariosPermitidos);
+    
+    setIsPermissionsModalOpen(true);
+  };
+
+  const handleClosePermissionsModal = () => {
+    setIsPermissionsModalOpen(false);
+    setCarpetaSeleccionada(null);
+    setUsuariosConPermisos([]);
+    setSearchUsuario('');
+    setPermissionsLoading(false);
+  };
+
+  const handleToggleUsuarioPermiso = (usuarioId: string) => {
+    if (usuariosConPermisos.includes(usuarioId)) {
+      // Remover permiso
+      setUsuariosConPermisos(prev => prev.filter(id => id !== usuarioId));
+    } else {
+      // Agregar permiso
+      setUsuariosConPermisos(prev => [...prev, usuarioId]);
+    }
+  };
+
+  const handleSavePermisos = async () => {
+    if (!carpetaSeleccionada) {
+      toast.error('No se ha seleccionado ninguna carpeta');
+      return;
+    }
+
+    setPermissionsLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    try {
+      const session = getSession();
+      if (!session) {
+        toast.error('No hay sesión activa');
+        setPermissionsLoading(false);
+        return;
+      }
+
+      // Determinar el tipo de restricción
+      let tipoRestriccion: 'publica' | 'por_usuario' = 'publica';
+      if (usuariosConPermisos.length > 0 && usuariosConPermisos.length < miembros.length) {
+        tipoRestriccion = 'por_usuario';
+      }
+
+      // Actualizar carpeta con nuevos permisos
+      carpetasStorage.update(carpetaSeleccionada.id, {
+        restricciones: {
+          tipo: tipoRestriccion,
+          usuariosPermitidos: usuariosConPermisos.length > 0 ? usuariosConPermisos : undefined
+        }
+      });
+
+      // Crear actividad
+      const usuario = usuariosProyectosStorage.getById(session.userId);
+      const mensaje = usuariosConPermisos.length === miembros.length || usuariosConPermisos.length === 0
+        ? `${usuario ? usuario.nombre : 'Usuario'} configuró la carpeta "${carpetaSeleccionada.nombre}" como pública`
+        : `${usuario ? usuario.nombre : 'Usuario'} configuró permisos restringidos para la carpeta "${carpetaSeleccionada.nombre}" (${usuariosConPermisos.length} usuario(s))`;
+
+      actividadesStorage.create({
+        id: generateProjectId('act'),
+        proyectoId: projectId,
+        tipo: 'comentario',
+        usuarioId: session.userId || session.username,
+        descripcion: mensaje,
+        fechaCreacion: getCurrentTimestamp()
+      });
+
+      toast.success('Permisos actualizados correctamente');
+      handleClosePermissionsModal();
+      loadProjectData();
+    } catch (error) {
+      toast.error('Error al actualizar permisos');
+      console.error(error);
+    } finally {
+      setPermissionsLoading(false);
+    }
+  };
+
   // Funciones para drag and drop
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
@@ -928,36 +1128,75 @@ export default function ProjectDetailPage() {
             return (
               <div
                 key={`folder-${carpeta.id}`}
-                className={`flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-lg transition-all cursor-pointer group relative ${
+                className={`flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-lg transition-all group relative ${
                   isDropTarget 
                     ? 'bg-primary/20 ring-2 ring-primary scale-105' 
                     : 'hover:bg-accent/50'
                 }`}
-                onClick={(e) => {
-                  if (!isDragging) {
-                    handleAbrirCarpeta(carpeta);
-                  }
-                }}
-                onDragOver={(e) => handleDragOverCarpeta(e, carpeta.id)}
-                onDragLeave={handleDragLeaveCarpeta}
-                onDrop={(e) => handleDrop(e, carpeta.id)}
               >
                 {isDropTarget && (
                   <div className="absolute inset-0 border-2 border-dashed border-primary rounded-lg pointer-events-none"></div>
                 )}
-                <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center">
-                  <Folder className={`w-11 h-11 sm:w-14 sm:h-14 text-[#fbbf24] transition-transform ${
-                    isDropTarget ? 'scale-110' : 'group-hover:scale-110'
-                  }`} />
+                
+                {/* Indicador de carpeta con restricciones */}
+                {carpeta.restricciones.tipo !== 'publica' && (
+                  <div className="absolute -top-1 sm:-top-1.5 -left-1 sm:-left-1.5 z-10">
+                    <div className="bg-amber-500 text-white p-0.5 sm:p-1 rounded-full shadow-md" title="Carpeta con restricciones">
+                      <Lock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                    </div>
+                  </div>
+                )}
+                
+                {/* Botones de acción (visible en hover) */}
+                <div className="absolute top-1 sm:top-2 right-1 sm:right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 z-10">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenPermissionsModal(carpeta);
+                    }}
+                    className="bg-amber-500 text-white p-1 sm:p-1.5 rounded-full hover:bg-amber-600 shadow-lg transition-colors"
+                    title="Gestionar permisos"
+                  >
+                    <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenShareModal(carpeta);
+                    }}
+                    className="bg-primary text-primary-foreground p-1 sm:p-1.5 rounded-full hover:bg-primary/90 shadow-lg transition-colors"
+                    title="Compartir externamente"
+                  >
+                    <Share2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                  </button>
                 </div>
-                <div className="text-center w-full">
-                  <p className="text-[10px] sm:text-xs text-foreground font-medium truncate px-1">
-                    {carpeta.nombre}
-                  </p>
-                  <p className="text-[9px] sm:text-[10px] text-muted-foreground">
-                    {totalElementos} {totalElementos === 1 ? 'elemento' : 'elementos'}
-                  </p>
+
+                <div 
+                  className="w-full h-full flex flex-col items-center cursor-pointer"
+                  onClick={(e) => {
+                    if (!isDragging) {
+                      handleAbrirCarpeta(carpeta);
+                    }
+                  }}
+                  onDragOver={(e) => handleDragOverCarpeta(e, carpeta.id)}
+                  onDragLeave={handleDragLeaveCarpeta}
+                  onDrop={(e) => handleDrop(e, carpeta.id)}
+                >
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center">
+                    <Folder className={`w-11 h-11 sm:w-14 sm:h-14 text-[#fbbf24] transition-transform ${
+                      isDropTarget ? 'scale-110' : 'group-hover:scale-110'
+                    }`} />
+                  </div>
+                  <div className="text-center w-full">
+                    <p className="text-[10px] sm:text-xs text-foreground font-medium truncate px-1">
+                      {carpeta.nombre}
+                    </p>
+                    <p className="text-[9px] sm:text-[10px] text-muted-foreground">
+                      {totalElementos} {totalElementos === 1 ? 'elemento' : 'elementos'}
+                    </p>
+                  </div>
                 </div>
+                
                 {isDropTarget && (
                   <div className="absolute -top-1 sm:-top-2 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
                     Soltar aquí
@@ -1658,6 +1897,402 @@ export default function ProjectDetailPage() {
                     </Button>
                   </div>
                 </form>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de Compartir Carpeta */}
+        {isShareModalOpen && carpetaSeleccionada && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={handleCloseShareModal}></div>
+            <div className="relative z-50 w-full max-w-md mx-4">
+              <Card className="border-primary/20 shadow-2xl">
+                <CardHeader className="border-b border-border bg-gradient-to-r from-primary/5 to-primary/10">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-primary">
+                      <Share2 className="w-5 h-5" />
+                      Compartir Carpeta
+                    </CardTitle>
+                    <button
+                      onClick={handleCloseShareModal}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                </CardHeader>
+                <form onSubmit={handleShareFolder}>
+                  <CardContent className="p-6 space-y-4">
+                    {/* Información de la carpeta */}
+                    <div className="bg-accent/30 border border-accent/50 rounded-lg p-3">
+                      <p className="text-xs text-muted-foreground mb-1">Carpeta a compartir:</p>
+                      <div className="flex items-center gap-2">
+                        <Folder className="w-4 h-4 text-[#fbbf24]" />
+                        <span className="text-sm font-medium text-foreground">
+                          {carpetaSeleccionada.nombre}
+                        </span>
+                      </div>
+                      {carpetaSeleccionada.descripcion && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {carpetaSeleccionada.descripcion}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Correo electrónico */}
+                    <div className="space-y-2">
+                      <Label htmlFor="emailCompartir" className="flex items-center gap-1">
+                        <Mail className="w-3.5 h-3.5" />
+                        Correo Electrónico *
+                      </Label>
+                      <Input
+                        id="emailCompartir"
+                        type="email"
+                        placeholder="usuario@ejemplo.com"
+                        value={shareFormData.email}
+                        onChange={(e) => setShareFormData({ ...shareFormData, email: e.target.value })}
+                        required
+                        disabled={shareLoading}
+                        autoFocus
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        La invitación se enviará a esta dirección de correo
+                      </p>
+                    </div>
+
+                    {/* Tipo de acceso */}
+                    <div className="space-y-2">
+                      <Label htmlFor="tipoAcceso">Tipo de Acceso *</Label>
+                      <Select
+                        value={shareFormData.tipoAcceso}
+                        onValueChange={(value) => 
+                          setShareFormData({ ...shareFormData, tipoAcceso: value as 'lectura' | 'escritura' })
+                        }
+                      >
+                        <SelectTrigger id="tipoAcceso" disabled={shareLoading}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="lectura">
+                            <div className="flex items-center gap-2">
+                              <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                              <span>Solo Lectura</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="escritura">
+                            <div className="flex items-center gap-2">
+                              <Edit2 className="w-3.5 h-3.5 text-primary" />
+                              <span>Lectura y Escritura</span>
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">
+                        {shareFormData.tipoAcceso === 'lectura' 
+                          ? 'Solo podrá visualizar y descargar archivos' 
+                          : 'Podrá visualizar, descargar y subir archivos'}
+                      </p>
+                    </div>
+
+                    {/* Mensaje opcional */}
+                    <div className="space-y-2">
+                      <Label htmlFor="mensajeCompartir">Mensaje (opcional)</Label>
+                      <Textarea
+                        id="mensajeCompartir"
+                        placeholder="Escribe un mensaje personalizado para el invitado..."
+                        value={shareFormData.mensaje}
+                        onChange={(e) => setShareFormData({ ...shareFormData, mensaje: e.target.value })}
+                        disabled={shareLoading}
+                        rows={3}
+                        className="resize-none"
+                      />
+                    </div>
+
+                    {/* Info de expiración */}
+                    <div className="bg-info/10 border border-info/30 rounded-lg p-3 flex items-start gap-2">
+                      <Clock className="w-4 h-4 text-info mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-xs font-medium text-info">Acceso temporal</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          La invitación expirará en 30 días
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <div className="border-t border-border p-6 flex justify-end gap-3">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={handleCloseShareModal} 
+                      disabled={shareLoading}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button type="submit" disabled={shareLoading} className="gap-2">
+                      {shareLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Enviando...
+                        </>
+                      ) : (
+                        <>
+                          <Mail className="w-4 h-4" />
+                          Invitar
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de Gestión de Permisos */}
+        {isPermissionsModalOpen && carpetaSeleccionada && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClosePermissionsModal}></div>
+            <div className="relative z-50 w-full max-w-2xl mx-4">
+              <Card className="border-primary/20 shadow-2xl max-h-[90vh] flex flex-col">
+                <CardHeader className="border-b border-border bg-gradient-to-r   shrink-0">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                      <Folder className="w-5 h-5" />
+                      Gestionar Permisos de Carpeta
+                    </CardTitle>
+                    <button
+                      onClick={handleClosePermissionsModal}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="p-6 space-y-4 overflow-y-auto flex-1">
+                  {/* Información de la carpeta */}
+                  <div className="bg-accent/30 border border-accent/50 rounded-lg p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        <Folder className="w-5 h-5 text-[#fbbf24]" />
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">
+                            {carpetaSeleccionada.nombre}
+                          </p>
+                          {carpetaSeleccionada.descripcion && (
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {carpetaSeleccionada.descripcion}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <Badge variant={carpetaSeleccionada.restricciones.tipo === 'publica' ? 'default' : 'secondary'} className="gap-1">
+                        {carpetaSeleccionada.restricciones.tipo === 'publica' ? (
+                          <>
+                            <Check className="w-3 h-3" />
+                            Pública
+                          </>
+                        ) : (
+                          <>
+                            <Lock className="w-3 h-3" />
+                            Restringida
+                          </>
+                        )}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Acciones rápidas */}
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        if (usuariosConPermisos.length === miembros.length) {
+                          setUsuariosConPermisos([]);
+                        } else {
+                          setUsuariosConPermisos(miembros.map(m => m.id));
+                        }
+                      }}
+                      disabled={permissionsLoading}
+                      className="gap-2"
+                    >
+                      {usuariosConPermisos.length === miembros.length ? (
+                        <>
+                          <X className="w-3.5 h-3.5" />
+                          Quitar todos
+                        </>
+                      ) : (
+                        <>
+                          <Check className="w-3.5 h-3.5" />
+                          Seleccionar todos
+                        </>
+                      )}
+                    </Button>
+                    <div className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Users className="w-3.5 h-3.5" />
+                      {usuariosConPermisos.length} de {miembros.length} usuario(s) con acceso
+                    </div>
+                  </div>
+
+                  {/* Buscador */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Buscar usuario por nombre o email..."
+                      value={searchUsuario}
+                      onChange={(e) => setSearchUsuario(e.target.value)}
+                      className="pl-10"
+                      disabled={permissionsLoading}
+                    />
+                  </div>
+
+                  {/* Lista de usuarios */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold">Miembros del Proyecto</Label>
+                    <div className="border border-border rounded-lg overflow-hidden">
+                      <div className="max-h-[400px] overflow-y-auto">
+                        {miembros
+                          .filter(miembro => {
+                            const searchLower = searchUsuario.toLowerCase();
+                            const nombreCompleto = `${miembro.nombre} ${miembro.apellidos}`.toLowerCase();
+                            const email = miembro.email.toLowerCase();
+                            return nombreCompleto.includes(searchLower) || email.includes(searchLower);
+                          })
+                          .map((miembro, index) => {
+                            const tienePermiso = usuariosConPermisos.includes(miembro.id);
+                            const rolProyecto = proyecto?.miembros.find(m => m.usuarioId === miembro.id);
+                            
+                            return (
+                              <div
+                                key={miembro.id}
+                                className={`flex items-center justify-between p-3 hover:bg-accent/50 transition-colors cursor-pointer ${
+                                  index !== 0 ? 'border-t border-border' : ''
+                                }`}
+                                onClick={() => handleToggleUsuarioPermiso(miembro.id)}
+                              >
+                                <div className="flex items-center gap-3 flex-1">
+                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold ${
+                                    tienePermiso 
+                                      ? 'bg-primary text-primary-foreground' 
+                                      : 'bg-muted text-muted-foreground'
+                                  }`}>
+                                    {miembro.nombre.charAt(0)}{miembro.apellidos.charAt(0)}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-foreground truncate">
+                                      {miembro.nombre} {miembro.apellidos}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground truncate">
+                                      {miembro.email}
+                                    </p>
+                                    {rolProyecto && (
+                                      <Badge variant="outline" className="text-[10px] mt-1">
+                                        {rolProyecto.rol === 'pm' ? 'Jefe de Proyecto' : rolProyecto.rol === 'colaborador' ? 'Colaborador' : 'Lector'}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                <div className="flex items-center gap-2">
+                                  {tienePermiso && (
+                                    <Badge variant="default" className="gap-1 bg-success text-success-foreground">
+                                      <Check className="w-3 h-3" />
+                                      Acceso
+                                    </Badge>
+                                  )}
+                                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                                    tienePermiso 
+                                      ? 'bg-primary border-primary' 
+                                      : 'border-muted-foreground/30 hover:border-primary/50'
+                                  }`}>
+                                    {tienePermiso && (
+                                      <Check className="w-3.5 h-3.5 text-primary-foreground" />
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </div>
+
+                    {miembros.filter(m => {
+                      const searchLower = searchUsuario.toLowerCase();
+                      const nombreCompleto = `${m.nombre} ${m.apellidos}`.toLowerCase();
+                      const email = m.email.toLowerCase();
+                      return nombreCompleto.includes(searchLower) || email.includes(searchLower);
+                    }).length === 0 && (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <Search className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">No se encontraron usuarios</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Información adicional */}
+                  <div className="bg-info/10 border border-info/30 rounded-lg p-3 flex items-start gap-2">
+                    <Users className="w-4 h-4 text-info mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs font-medium text-info">Acerca de los permisos</p>
+                      <ul className="text-xs text-muted-foreground mt-1 space-y-0.5 list-disc list-inside">
+                        <li>Los usuarios sin acceso no verán esta carpeta ni sus archivos</li>
+                        <li>Si no seleccionas ningún usuario, la carpeta será pública</li>
+                        <li>Los cambios se aplicarán inmediatamente</li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+
+                <div className="border-t border-border p-6 flex justify-between items-center shrink-0 bg-muted/30">
+                  <div className="text-xs text-muted-foreground">
+                    {usuariosConPermisos.length === 0 && (
+                      <span className="flex items-center gap-1">
+                        <Check className="w-3.5 h-3.5" />
+                        Carpeta pública: Todos tienen acceso
+                      </span>
+                    )}
+                    {usuariosConPermisos.length > 0 && usuariosConPermisos.length < miembros.length && (
+                      <span className="flex items-center gap-1">
+                        <Lock className="w-3.5 h-3.5 text-amber-500" />
+                        Carpeta restringida: Solo {usuariosConPermisos.length} usuario(s)
+                      </span>
+                    )}
+                    {usuariosConPermisos.length === miembros.length && usuariosConPermisos.length > 0 && (
+                      <span className="flex items-center gap-1">
+                        <Check className="w-3.5 h-3.5" />
+                        Carpeta pública: Todos tienen acceso
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-3">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={handleClosePermissionsModal} 
+                      disabled={permissionsLoading}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button 
+                      onClick={handleSavePermisos} 
+                      disabled={permissionsLoading} 
+                      className="gap-2"
+                    >
+                      {permissionsLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Guardando...
+                        </>
+                      ) : (
+                        <>
+                          Guardar Permisos
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
               </Card>
             </div>
           </div>

@@ -293,7 +293,7 @@ export default function PuestosDeTrabajoPage() {
                 <TableHeader>
                   <TableRow className="border-b border-border/50">
                     <TableHead className="font-semibold text-foreground">Puesto</TableHead>
-                    <TableHead className="font-semibold text-foreground">Departamento</TableHead>
+                    <TableHead className="font-semibold text-foreground">   Áreas de trabajo</TableHead>
                     <TableHead className="font-semibold text-foreground">Descripción</TableHead>
                     <TableHead className="font-semibold text-foreground">Asignaciones</TableHead>
                     <TableHead className="font-semibold text-foreground text-right">Acciones</TableHead>

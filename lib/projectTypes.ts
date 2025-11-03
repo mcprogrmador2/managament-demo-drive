@@ -139,3 +139,17 @@ export interface Permiso {
   asignadoPor: string;
 }
 
+export interface InvitacionExterna {
+  id: string;
+  carpetaId: string;
+  proyectoId: string;
+  email: string;
+  tipoAcceso: 'lectura' | 'escritura';
+  estado: 'pendiente' | 'aceptada' | 'rechazada' | 'expirada';
+  token: string; // Token único para acceso
+  fechaExpiracion: string;
+  fechaCreacion: string;
+  creadoPor: string;
+  mensaje?: string;
+}
+
