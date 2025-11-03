@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { 
   Building2, 
@@ -40,31 +40,31 @@ export default function EmpresaDetailPage() {
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadEmpresaData = useCallback(() => {
-    initializeProjectData();
-    
-    const empresaData = empresasStorage.getById(empresaId);
-    if (empresaData) {
-      setEmpresa(empresaData);
-      
-      // Cargar áreas de la empresa
-      const areasData = areasStorage.find((area: Area) => area.empresaId === empresaId);
-      setAreas(areasData);
-
-      // Cargar proyectos de la empresa
-      const proyectosData = proyectosStorage.find((proyecto: Proyecto) => proyecto.empresaId === empresaId);
-      setProyectos(proyectosData);
-      setLoading(false);
-    } else {
-      // Si no encuentra la empresa, redirigir a la lista
-      setLoading(false);
-      router.push('/administradores/empresas');
-    }
-  }, [empresaId, router]);
-
   useEffect(() => {
+    const loadEmpresaData = () => {
+      initializeProjectData();
+      
+      const empresaData = empresasStorage.getById(empresaId);
+      if (empresaData) {
+        setEmpresa(empresaData);
+        
+        // Cargar áreas de la empresa
+        const areasData = areasStorage.find((area: Area) => area.empresaId === empresaId);
+        setAreas(areasData);
+
+        // Cargar proyectos de la empresa
+        const proyectosData = proyectosStorage.find((proyecto: Proyecto) => proyecto.empresaId === empresaId);
+        setProyectos(proyectosData);
+        setLoading(false);
+      } else {
+        // Si no encuentra la empresa, redirigir a la lista
+        setLoading(false);
+        router.push('/administradores/empresas');
+      }
+    };
+
     loadEmpresaData();
-  }, [loadEmpresaData]);
+  }, [empresaId, router]);
 
   const handleBack = () => {
     router.push('/administradores/empresas');
