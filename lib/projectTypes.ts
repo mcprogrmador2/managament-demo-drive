@@ -32,8 +32,19 @@ export interface Usuario {
   telefono?: string;
   rol: 'admin' | 'pm' | 'colaborador' | 'oficina_central';
   areasAsignadas: string[]; // IDs de áreas
+  puestoId?: string; // ID del puesto de trabajo
   activo: boolean;
   fechaCreacion: string;
+}
+
+export interface PuestoDeTrabajo {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+  departamento?: string;
+  activo: boolean;
+  fechaCreacion: string;
+  fechaActualizacion: string;
 }
 
 export interface Proyecto {

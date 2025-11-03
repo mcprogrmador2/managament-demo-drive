@@ -3,6 +3,7 @@ import {
   Empresa,
   Area,
   Usuario,
+  PuestoDeTrabajo,
   Proyecto,
   Carpeta,
   Archivo,
@@ -11,6 +12,7 @@ import {
 import {
   empresasMock,
   areasMock,
+  puestosDeTrabajoMock,
   usuariosMock,
   proyectosMock,
   carpetasMock,
@@ -85,6 +87,7 @@ class ProjectStorageManager<T> {
 export const empresasStorage = new ProjectStorageManager<Empresa>('proyectos_empresas');
 export const areasStorage = new ProjectStorageManager<Area>('proyectos_areas');
 export const usuariosProyectosStorage = new ProjectStorageManager<Usuario>('proyectos_usuarios');
+export const puestosDeTrabajoStorage = new ProjectStorageManager<PuestoDeTrabajo>('proyectos_puestos_de_trabajo');
 export const proyectosStorage = new ProjectStorageManager<Proyecto>('proyectos_proyectos');
 export const carpetasStorage = new ProjectStorageManager<Carpeta>('proyectos_carpetas');
 export const archivosStorage = new ProjectStorageManager<Archivo>('proyectos_archivos');
@@ -101,30 +104,33 @@ export function getCurrentTimestamp(): string {
 
 // Inicializar datos mock si no existen
 export function initializeProjectData() {
-  if (localStorage.getItem('proyectos_data_initialized') !== 'true') {
-    // Inicializar datos si no existen
-    if (empresasStorage.getAll().length === 0) {
-      empresasMock.forEach(emp => empresasStorage.create(emp));
-    }
-    if (areasStorage.getAll().length === 0) {
-      areasMock.forEach(area => areasStorage.create(area));
-    }
-    if (usuariosProyectosStorage.getAll().length === 0) {
-      usuariosMock.forEach(user => usuariosProyectosStorage.create(user));
-    }
-    if (proyectosStorage.getAll().length === 0) {
-      proyectosMock.forEach(proy => proyectosStorage.create(proy));
-    }
-    if (carpetasStorage.getAll().length === 0) {
-      carpetasMock.forEach(carp => carpetasStorage.create(carp));
-    }
-    if (archivosStorage.getAll().length === 0) {
-      archivosMock.forEach(arch => archivosStorage.create(arch));
-    }
-    if (actividadesStorage.getAll().length === 0) {
-      actividadesMock.forEach(act => actividadesStorage.create(act));
-    }
+  // Inicializar datos si no existen
+  if (empresasStorage.getAll().length === 0) {
+    empresasMock.forEach(emp => empresasStorage.create(emp));
+  }
+  if (areasStorage.getAll().length === 0) {
+    areasMock.forEach(area => areasStorage.create(area));
+  }
+  if (puestosDeTrabajoStorage.getAll().length === 0) {
+    puestosDeTrabajoMock.forEach(puesto => puestosDeTrabajoStorage.create(puesto));
+  }
+  if (usuariosProyectosStorage.getAll().length === 0) {
+    usuariosMock.forEach(user => usuariosProyectosStorage.create(user));
+  }
+  if (proyectosStorage.getAll().length === 0) {
+    proyectosMock.forEach(proy => proyectosStorage.create(proy));
+  }
+  if (carpetasStorage.getAll().length === 0) {
+    carpetasMock.forEach(carp => carpetasStorage.create(carp));
+  }
+  if (archivosStorage.getAll().length === 0) {
+    archivosMock.forEach(arch => archivosStorage.create(arch));
+  }
+  if (actividadesStorage.getAll().length === 0) {
+    actividadesMock.forEach(act => actividadesStorage.create(act));
+  }
 
+  if (localStorage.getItem('proyectos_data_initialized') !== 'true') {
     localStorage.setItem('proyectos_data_initialized', 'true');
   }
 }
@@ -134,6 +140,7 @@ export function resetProjectData() {
   localStorage.removeItem('proyectos_data_initialized');
   localStorage.removeItem('proyectos_empresas');
   localStorage.removeItem('proyectos_areas');
+  localStorage.removeItem('proyectos_puestos_de_trabajo');
   localStorage.removeItem('proyectos_usuarios');
   localStorage.removeItem('proyectos_proyectos');
   localStorage.removeItem('proyectos_carpetas');

@@ -49,6 +49,12 @@ export function AdministradorSidebar({ adminNombre, isCollapsed, onToggleCollaps
         icon: Users,
         path: "/administradores/usuarios"
       },
+      {
+        title: "Puestos de trabajo",
+        onClick: () => router.push("/administradores/puestos-de-trabajo"),
+        icon: FileText,
+        path: "/administradores/puestos-de-trabajo"
+      },
     ],
     navControl: [
       {
@@ -63,6 +69,7 @@ export function AdministradorSidebar({ adminNombre, isCollapsed, onToggleCollaps
         icon: FileText,
         path: "/administradores/reportes"
       },
+      
     ],
     navConfig: [
       {

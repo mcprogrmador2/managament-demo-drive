@@ -3,6 +3,7 @@ import {
   Empresa, 
   Area, 
   Usuario, 
+  PuestoDeTrabajo,
   Proyecto, 
   Carpeta, 
   Archivo, 
@@ -42,6 +43,46 @@ export const areasMock: Area[] = [
   { id: 'area_003', empresaId: 'emp_001', nombre: 'Finanzas', descripcion: 'Contabilidad y Finanzas', activo: true, fechaCreacion: new Date('2024-01-01').toISOString() },
   { id: 'area_004', empresaId: 'emp_001', nombre: 'Oficina Central', descripcion: 'Control y Revisión', activo: true, fechaCreacion: new Date('2024-01-01').toISOString() },
   { id: 'area_005', empresaId: 'emp_002', nombre: 'Operaciones', descripcion: 'Gestión de Operaciones', activo: true, fechaCreacion: new Date('2024-01-15').toISOString() }
+];
+
+// Puestos de Trabajo
+export const puestosDeTrabajoMock: PuestoDeTrabajo[] = [
+  { 
+    id: 'puesto_001', 
+    nombre: 'Vendedor', 
+    descripcion: 'Responsable de ventas y atención directa al cliente', 
+    departamento: 'Comercial',
+    activo: true, 
+    fechaCreacion: new Date('2024-01-01').toISOString(),
+    fechaActualizacion: new Date().toISOString()
+  },
+  { 
+    id: 'puesto_002', 
+    nombre: 'Jefe de Ventas', 
+    descripcion: 'Supervisión y coordinación del equipo comercial', 
+    departamento: 'Comercial',
+    activo: true, 
+    fechaCreacion: new Date('2024-01-01').toISOString(),
+    fechaActualizacion: new Date().toISOString()
+  },
+  { 
+    id: 'puesto_003', 
+    nombre: 'Atención al Cliente', 
+    descripcion: 'Soporte y atención a clientes en punto de venta y servicio post-venta', 
+    departamento: 'Comercial',
+    activo: true, 
+    fechaCreacion: new Date('2024-01-01').toISOString(),
+    fechaActualizacion: new Date().toISOString()
+  },
+  { 
+    id: 'puesto_004', 
+    nombre: 'Asistente Administrativo', 
+    descripcion: 'Apoyo en tareas administrativas y logísticas', 
+    departamento: 'RRHH',
+    activo: true, 
+    fechaCreacion: new Date('2024-01-01').toISOString(),
+    fechaActualizacion: new Date().toISOString()
+  }
 ];
 
 // Usuarios
