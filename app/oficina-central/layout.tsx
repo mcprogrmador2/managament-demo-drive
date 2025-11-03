@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AdministradorSidebar } from '@/components/administradores-components/administrador-sidebar';
+import { OficinaCentralSidebar } from '@/components/oficina-central-components/oficina-central-sidebar';
 import { ModeToggle } from '@/components/mode-toggle';
 import { isAuthenticated, getSession } from '@/lib/auth';
 import { usuariosProyectosStorage } from '@/lib/projectStorage';
@@ -14,7 +14,7 @@ export default function OficinaCentralLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const [adminNombre, setAdminNombre] = useState('');
+  const [usuarioNombre, setUsuarioNombre] = useState('');
   const [loading, setLoading] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -26,15 +26,15 @@ export default function OficinaCentralLayout({
       }
 
       const session = getSession();
-      if (session?.rol !== 'admin') {
+      if (session?.rol !== 'oficina_central') {
         router.push('/auth');
         return;
       }
 
-      // Obtener nombre del admin
+      // Obtener nombre del usuario de Oficina Central
       const usuario = usuariosProyectosStorage.getById(session.userId);
       if (usuario) {
-        setAdminNombre(`${usuario.nombre} ${usuario.apellidos}`);
+        setUsuarioNombre(`${usuario.nombre} ${usuario.apellidos}`);
       }
 
       setLoading(false);
@@ -53,7 +53,7 @@ export default function OficinaCentralLayout({
 
   return (
     <div className="flex h-screen w-full">
-      <AdministradorSidebar adminNombre={adminNombre} isCollapsed={isCollapsed} onToggleCollapse={() => setIsCollapsed(!isCollapsed)} />
+      <OficinaCentralSidebar usuarioNombre={usuarioNombre} isCollapsed={isCollapsed} onToggleCollapse={() => setIsCollapsed(!isCollapsed)} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4 bg-background">
           <button

@@ -55,30 +55,7 @@ export function AdministradorSidebar({ adminNombre, isCollapsed, onToggleCollaps
         icon: FileText,
         path: "/administradores/puestos-de-trabajo"
       },
-    ],
-    navControl: [
-      {
-        title: "Oficina Central",
-        onClick: () => router.push("/administradores/oficina-central"),
-        icon: FileText,
-        path: "/administradores/oficina-central"
-      },
-      {
-        title: "Reportes",
-        onClick: () => router.push("/administradores/reportes"),
-        icon: FileText,
-        path: "/administradores/reportes"
-      },
-      
-    ],
-    navConfig: [
-      {
-        title: "Configuración",
-        onClick: () => router.push("/administradores/configuracion"),
-        icon: Settings,
-        path: "/administradores/configuracion"
-      },
-    ],
+    ]
   };
 
   const handleLogout = () => {
@@ -159,63 +136,7 @@ export function AdministradorSidebar({ adminNombre, isCollapsed, onToggleCollaps
           </div>
         </div>
 
-        {/* Control */}
-        <div className={`${isCollapsed ? 'p-2' : 'p-4'}`}>
-          {!isCollapsed && (
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-              Control
-            </h3>
-          )}
-          <div className="space-y-1">
-            {data.navControl.map((item) => {
-              const isActive = pathname === item.path;
-              return (
-                <button
-                  key={item.title}
-                  onClick={item.onClick}
-                  title={isCollapsed ? item.title : undefined}
-                  className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} ${isCollapsed ? 'px-2 py-3' : 'px-3 py-2.5'} rounded-lg text-sm transition-all duration-200 group w-full text-left ${
-                    isActive
-                      ? "bg-primary text-primary-foreground" 
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                  }`}
-                >
-                  <item.icon className="w-5 h-5" />
-                  {!isCollapsed && <span className="font-medium">{item.title}</span>}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Configuración */}
-        <div className={`${isCollapsed ? 'p-2' : 'p-4'}`}>
-          {!isCollapsed && (
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-              Sistema
-            </h3>
-          )}
-          <div className="space-y-1">
-            {data.navConfig.map((item) => {
-              const isActive = pathname === item.path;
-              return (
-                <button
-                  key={item.title}
-                  onClick={item.onClick}
-                  title={isCollapsed ? item.title : undefined}
-                  className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} ${isCollapsed ? 'px-2 py-3' : 'px-3 py-2.5'} rounded-lg text-sm transition-all duration-200 group w-full text-left ${
-                    isActive
-                      ? "bg-primary text-primary-foreground" 
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                  }`}
-                >
-                  <item.icon className="w-5 h-5" />
-                  {!isCollapsed && <span className="font-medium">{item.title}</span>}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+     
       </div>
       
       <div className={`border-t border-sidebar-border ${isCollapsed ? 'p-2' : 'p-4'} space-y-3`}>
