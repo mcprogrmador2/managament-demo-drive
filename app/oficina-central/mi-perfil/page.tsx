@@ -39,6 +39,7 @@ export default function MiPerfilPage() {
     }
 
     const user = usuariosProyectosStorage.getById(session.userId);
+    
     if (user) {
       setUsuario(user);
       setFormData({

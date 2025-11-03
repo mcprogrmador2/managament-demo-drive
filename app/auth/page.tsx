@@ -19,7 +19,7 @@ const login = (username: string, password: string) => {
   
   if (usuario && usuario.activo) {
     const session = {
-      usuarioId: usuario.id,
+      userId: usuario.id,
       username: usuario.username,
       rol: usuario.rol,
       timestamp: new Date().toISOString()
@@ -232,7 +232,11 @@ export default function AuthPage() {
                       <span className="text-muted-foreground">Admin:</span>
                       <span className="font-mono text-foreground">admin / admin123</span>
                     </li>
-                    
+                    <li className="flex justify-between items-center py-1">
+                      <span className="text-muted-foreground">Oficina Central:</span>
+                      <span className="font-mono text-foreground">control.central / control123</span>
+                    </li>
+                  
                   </ul>
                 </div>
               </form>

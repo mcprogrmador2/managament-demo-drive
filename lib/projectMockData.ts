@@ -188,6 +188,70 @@ export const proyectosMock: Proyecto[] = [
     fechaCierre: new Date('2024-01-31').toISOString(),
     fechaCreacion: new Date('2024-01-15').toISOString(),
     creadoPor: 'usr_001'
+  },
+  {
+    id: 'proj_003',
+    nombre: 'Expansión de Planta Industrial',
+    descripcion: 'Ampliación de las instalaciones de producción',
+    empresaId: 'emp_001',
+    areasAsociadas: ['area_002', 'area_003'],
+    estado: 'cerrado',
+    pmId: 'usr_002',
+    miembros: [
+      { usuarioId: 'usr_002', rol: 'pm', areaId: 'area_002', fechaAsignacion: new Date('2023-11-01').toISOString() }
+    ],
+    fechaInicio: new Date('2023-11-01').toISOString(),
+    fechaCierre: new Date('2024-01-20').toISOString(),
+    fechaCreacion: new Date('2023-11-01').toISOString(),
+    creadoPor: 'usr_001'
+  },
+  {
+    id: 'proj_004',
+    nombre: 'Modernización de Infraestructura IT',
+    descripcion: 'Actualización de servidores y sistemas informáticos',
+    empresaId: 'emp_002',
+    areasAsociadas: ['area_005'],
+    estado: 'aprobado',
+    pmId: 'usr_004',
+    miembros: [
+      { usuarioId: 'usr_004', rol: 'pm', areaId: 'area_005', fechaAsignacion: new Date('2023-12-10').toISOString() }
+    ],
+    fechaInicio: new Date('2023-12-10').toISOString(),
+    fechaCierre: new Date('2024-02-15').toISOString(),
+    fechaCreacion: new Date('2023-12-10').toISOString(),
+    creadoPor: 'usr_001'
+  },
+  {
+    id: 'proj_005',
+    nombre: 'Programa de Capacitación Corporativa',
+    descripcion: 'Implementación de programa integral de desarrollo de talento',
+    empresaId: 'emp_001',
+    areasAsociadas: ['area_001'],
+    estado: 'cerrado',
+    pmId: 'usr_002',
+    miembros: [
+      { usuarioId: 'usr_002', rol: 'pm', areaId: 'area_001', fechaAsignacion: new Date('2023-10-15').toISOString() }
+    ],
+    fechaInicio: new Date('2023-10-15').toISOString(),
+    fechaCierre: new Date('2024-01-10').toISOString(),
+    fechaCreacion: new Date('2023-10-15').toISOString(),
+    creadoPor: 'usr_001'
+  },
+  {
+    id: 'proj_006',
+    nombre: 'Implementación de CRM',
+    descripcion: 'Despliegue de sistema de gestión de relaciones con clientes',
+    empresaId: 'emp_002',
+    areasAsociadas: ['area_002', 'area_005'],
+    estado: 'cerrado',
+    pmId: 'usr_004',
+    miembros: [
+      { usuarioId: 'usr_004', rol: 'pm', areaId: 'area_005', fechaAsignacion: new Date('2023-09-01').toISOString() }
+    ],
+    fechaInicio: new Date('2023-09-01').toISOString(),
+    fechaCierre: new Date('2023-12-31').toISOString(),
+    fechaCreacion: new Date('2023-09-01').toISOString(),
+    creadoPor: 'usr_001'
   }
 ];
 
@@ -230,6 +294,67 @@ export const carpetasMock: Carpeta[] = [
     },
     fechaCreacion: new Date('2024-02-02').toISOString(),
     creadoPor: 'usr_002'
+  },
+  // Carpetas finales para proyectos cerrados
+  {
+    id: 'carp_004',
+    proyectoId: 'proj_002',
+    nombre: 'Documentos Finales Revisados',
+    descripcion: 'Documentación final del proyecto Sistema de Gestión Financiera',
+    orden: 1,
+    restricciones: {
+      tipo: 'final'
+    },
+    fechaCreacion: new Date('2024-01-31').toISOString(),
+    creadoPor: 'usr_005'
+  },
+  {
+    id: 'carp_005',
+    proyectoId: 'proj_003',
+    nombre: 'Entrega Final - Expansión Planta',
+    descripcion: 'Documentos finales revisados de la expansión de planta',
+    orden: 1,
+    restricciones: {
+      tipo: 'final'
+    },
+    fechaCreacion: new Date('2024-01-20').toISOString(),
+    creadoPor: 'usr_005'
+  },
+  {
+    id: 'carp_006',
+    proyectoId: 'proj_004',
+    nombre: 'Documentación Final Aprobada',
+    descripcion: 'Documentos finales del proyecto de modernización IT',
+    orden: 1,
+    restricciones: {
+      tipo: 'final'
+    },
+    fechaCreacion: new Date('2024-02-15').toISOString(),
+    creadoPor: 'usr_005'
+  },
+  {
+    id: 'carp_007',
+    proyectoId: 'proj_005',
+    nombre: 'Final - Capacitación Corporativa',
+    descripcion: 'Documentos finales del programa de capacitación',
+    orden: 1,
+    restricciones: {
+      tipo: 'final'
+    },
+    fechaCreacion: new Date('2024-01-10').toISOString(),
+    creadoPor: 'usr_005'
+  },
+  {
+    id: 'carp_008',
+    proyectoId: 'proj_006',
+    nombre: 'Documentos Finales CRM',
+    descripcion: 'Entrega final del proyecto de implementación CRM',
+    orden: 1,
+    restricciones: {
+      tipo: 'final'
+    },
+    fechaCreacion: new Date('2023-12-31').toISOString(),
+    creadoPor: 'usr_005'
   }
 ];
 
@@ -264,6 +389,221 @@ export const archivosMock: Archivo[] = [
     subidoPor: 'usr_004',
     fechaSubida: new Date('2024-02-10').toISOString(),
     fechaModificacion: new Date('2024-02-10').toISOString()
+  },
+  // Archivos finales para proyecto proj_002 (Sistema de Gestión Financiera)
+  {
+    id: 'arch_003',
+    carpetaId: 'carp_004',
+    nombre: 'Informe_Final_ERP',
+    nombreOriginal: 'Informe Final Implementación ERP.pdf',
+    tipo: 'application/pdf',
+    tamaño: 1234567,
+    extension: 'pdf',
+    url: '/files/informe-final-erp.pdf',
+    version: 1,
+    estado: 'activo',
+    subidoPor: 'usr_005',
+    fechaSubida: new Date('2024-01-31').toISOString(),
+    fechaModificacion: new Date('2024-01-31').toISOString()
+  },
+  {
+    id: 'arch_004',
+    carpetaId: 'carp_004',
+    nombre: 'Manual_Usuario_ERP',
+    nombreOriginal: 'Manual de Usuario ERP.docx',
+    tipo: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    tamaño: 987654,
+    extension: 'docx',
+    url: '/files/manual-usuario-erp.docx',
+    version: 1,
+    estado: 'activo',
+    subidoPor: 'usr_005',
+    fechaSubida: new Date('2024-01-31').toISOString(),
+    fechaModificacion: new Date('2024-01-31').toISOString()
+  },
+  {
+    id: 'arch_005',
+    carpetaId: 'carp_004',
+    nombre: 'Resumen_Ejecutivo_ERP',
+    nombreOriginal: 'Resumen Ejecutivo Proyecto ERP.xlsx',
+    tipo: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    tamaño: 234567,
+    extension: 'xlsx',
+    url: '/files/resumen-ejecutivo-erp.xlsx',
+    version: 1,
+    estado: 'activo',
+    subidoPor: 'usr_005',
+    fechaSubida: new Date('2024-01-31').toISOString(),
+    fechaModificacion: new Date('2024-01-31').toISOString()
+  },
+  // Archivos finales para proyecto proj_003 (Expansión de Planta)
+  {
+    id: 'arch_006',
+    carpetaId: 'carp_005',
+    nombre: 'Informe_Final_Expansion',
+    nombreOriginal: 'Informe Final Expansión Planta Industrial.pdf',
+    tipo: 'application/pdf',
+    tamaño: 3456789,
+    extension: 'pdf',
+    url: '/files/informe-final-expansion.pdf',
+    version: 1,
+    estado: 'activo',
+    subidoPor: 'usr_005',
+    fechaSubida: new Date('2024-01-20').toISOString(),
+    fechaModificacion: new Date('2024-01-20').toISOString()
+  },
+  {
+    id: 'arch_007',
+    carpetaId: 'carp_005',
+    nombre: 'Planos_Finales_Expansion',
+    nombreOriginal: 'Planos Finales Expansión.dwg',
+    tipo: 'application/acad',
+    tamaño: 5678901,
+    extension: 'dwg',
+    url: '/files/planos-finales-expansion.dwg',
+    version: 1,
+    estado: 'activo',
+    subidoPor: 'usr_005',
+    fechaSubida: new Date('2024-01-20').toISOString(),
+    fechaModificacion: new Date('2024-01-20').toISOString()
+  },
+  {
+    id: 'arch_008',
+    carpetaId: 'carp_005',
+    nombre: 'Certificaciones_Finales',
+    nombreOriginal: 'Certificaciones Finales.pdf',
+    tipo: 'application/pdf',
+    tamaño: 890123,
+    extension: 'pdf',
+    url: '/files/certificaciones-finales.pdf',
+    version: 1,
+    estado: 'activo',
+    subidoPor: 'usr_005',
+    fechaSubida: new Date('2024-01-20').toISOString(),
+    fechaModificacion: new Date('2024-01-20').toISOString()
+  },
+  // Archivos finales para proyecto proj_004 (Modernización IT)
+  {
+    id: 'arch_009',
+    carpetaId: 'carp_006',
+    nombre: 'Informe_Final_Modernizacion',
+    nombreOriginal: 'Informe Final Modernización IT.pdf',
+    tipo: 'application/pdf',
+    tamaño: 2345678,
+    extension: 'pdf',
+    url: '/files/informe-final-modernizacion.pdf',
+    version: 1,
+    estado: 'activo',
+    subidoPor: 'usr_005',
+    fechaSubida: new Date('2024-02-15').toISOString(),
+    fechaModificacion: new Date('2024-02-15').toISOString()
+  },
+  {
+    id: 'arch_010',
+    carpetaId: 'carp_006',
+    nombre: 'Especificaciones_Tecnicas',
+    nombreOriginal: 'Especificaciones Técnicas Servidores.docx',
+    tipo: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    tamaño: 1234567,
+    extension: 'docx',
+    url: '/files/especificaciones-tecnicas.docx',
+    version: 1,
+    estado: 'activo',
+    subidoPor: 'usr_005',
+    fechaSubida: new Date('2024-02-15').toISOString(),
+    fechaModificacion: new Date('2024-02-15').toISOString()
+  },
+  // Archivos finales para proyecto proj_005 (Capacitación)
+  {
+    id: 'arch_011',
+    carpetaId: 'carp_007',
+    nombre: 'Informe_Final_Capacitacion',
+    nombreOriginal: 'Informe Final Programa Capacitación.pdf',
+    tipo: 'application/pdf',
+    tamaño: 1123456,
+    extension: 'pdf',
+    url: '/files/informe-final-capacitacion.pdf',
+    version: 1,
+    estado: 'activo',
+    subidoPor: 'usr_005',
+    fechaSubida: new Date('2024-01-10').toISOString(),
+    fechaModificacion: new Date('2024-01-10').toISOString()
+  },
+  {
+    id: 'arch_012',
+    carpetaId: 'carp_007',
+    nombre: 'Material_Capacitacion',
+    nombreOriginal: 'Material de Capacitación.zip',
+    tipo: 'application/zip',
+    tamaño: 4567890,
+    extension: 'zip',
+    url: '/files/material-capacitacion.zip',
+    version: 1,
+    estado: 'activo',
+    subidoPor: 'usr_005',
+    fechaSubida: new Date('2024-01-10').toISOString(),
+    fechaModificacion: new Date('2024-01-10').toISOString()
+  },
+  {
+    id: 'arch_013',
+    carpetaId: 'carp_007',
+    nombre: 'Evaluacion_Resultados',
+    nombreOriginal: 'Evaluación de Resultados.xlsx',
+    tipo: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    tamaño: 345678,
+    extension: 'xlsx',
+    url: '/files/evaluacion-resultados.xlsx',
+    version: 1,
+    estado: 'activo',
+    subidoPor: 'usr_005',
+    fechaSubida: new Date('2024-01-10').toISOString(),
+    fechaModificacion: new Date('2024-01-10').toISOString()
+  },
+  // Archivos finales para proyecto proj_006 (CRM)
+  {
+    id: 'arch_014',
+    carpetaId: 'carp_008',
+    nombre: 'Informe_Final_CRM',
+    nombreOriginal: 'Informe Final Implementación CRM.pdf',
+    tipo: 'application/pdf',
+    tamaño: 1789012,
+    extension: 'pdf',
+    url: '/files/informe-final-crm.pdf',
+    version: 1,
+    estado: 'activo',
+    subidoPor: 'usr_005',
+    fechaSubida: new Date('2023-12-31').toISOString(),
+    fechaModificacion: new Date('2023-12-31').toISOString()
+  },
+  {
+    id: 'arch_015',
+    carpetaId: 'carp_008',
+    nombre: 'Configuracion_CRM',
+    nombreOriginal: 'Configuración Sistema CRM.docx',
+    tipo: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    tamaño: 987654,
+    extension: 'docx',
+    url: '/files/configuracion-crm.docx',
+    version: 1,
+    estado: 'activo',
+    subidoPor: 'usr_005',
+    fechaSubida: new Date('2023-12-31').toISOString(),
+    fechaModificacion: new Date('2023-12-31').toISOString()
+  },
+  {
+    id: 'arch_016',
+    carpetaId: 'carp_008',
+    nombre: 'Manual_CRM',
+    nombreOriginal: 'Manual de Usuario CRM.pdf',
+    tipo: 'application/pdf',
+    tamaño: 2345678,
+    extension: 'pdf',
+    url: '/files/manual-crm.pdf',
+    version: 1,
+    estado: 'activo',
+    subidoPor: 'usr_005',
+    fechaSubida: new Date('2023-12-31').toISOString(),
+    fechaModificacion: new Date('2023-12-31').toISOString()
   }
 ];
 
