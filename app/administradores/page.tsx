@@ -34,10 +34,10 @@ import {
   generateProjectId,
   getCurrentTimestamp
 } from '@/lib/projectStorage';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { getSession } from '@/lib/auth';
 import { toast } from 'sonner';
-import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from 'recharts';
+import { Pie, PieChart, Label as RechartsLabel, ResponsiveContainer } from 'recharts';
 import { ChartConfig, ChartContainer } from '@/components/ui/chart';
 import { Proyecto, Empresa, Usuario } from '@/lib/projectTypes';
 
@@ -85,6 +85,8 @@ export default function AdministradorDashboard() {
 
     const proyectosAbiertos = proyectos.filter(p => p.estado === 'abierto').length;
     const proyectosCerrados = proyectos.filter(p => p.estado === 'cerrado' || p.estado === 'aprobado').length;
+    
+    
     const ultimosProyectos = proyectos
       .sort((a, b) => new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime())
       .slice(0, 5);
@@ -114,13 +116,35 @@ export default function AdministradorDashboard() {
     loadStats();
   }, []);
 
-  // Configuración del gráfico
+  // Configuración del gráfico pie/donut
   const chartConfig = {
-    proyectos: {
-      label: "Proyectos",
+    abiertos: {
+      label: "En Progreso",
       color: "var(--chart-1)",
     },
+    completados: {
+      label: "Completados",
+      color: "var(--chart-4)",
+    },
   } satisfies ChartConfig;
+
+  // Datos para el gráfico pie/donut (usando useMemo para recalcular cuando stats cambie)
+  const chartData = useMemo(() => {
+    const data = [
+      { 
+        name: "abiertos", 
+        value: stats.proyectosAbiertos, 
+        fill: "var(--color-abiertos)" 
+      },
+      { 
+        name: "completados", 
+        value: stats.proyectosCerrados, 
+        fill: "var(--color-completados)" 
+      }
+    ];
+   
+    return data;
+  }, [stats.proyectosAbiertos, stats.proyectosCerrados]);
 
   const handleCrearProyecto = () => {
     setIsModalOpen(true);
@@ -278,56 +302,68 @@ export default function AdministradorDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-primary">
                 <BarChart3 className="w-5 h-5" />
-                Distribución por Empresa
+                Visualización de proyectos cerrados exitosamente
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  Visualización de proyectos por empresa registrada
-                </p>
-                {stats.distribucionEmpresas.length > 0 ? (
-                  <ChartContainer config={chartConfig}>
-                    <BarChart
-                      accessibilityLayer
-                      data={stats.distribucionEmpresas}
-                      layout="vertical"
-                      margin={{
-                        top: 0,
-                        right: 16,
-                        left: 16,
-                        bottom: 0,
-                      }}
+                
+                {stats.totalProyectos > 0 ? (
+                  <div className="w-full flex items-center justify-center py-4 min-h-[300px]">
+                    <ChartContainer
+                      config={chartConfig}
+                      className="mx-auto aspect-square max-w-[300px] w-full"
                     >
-                      <CartesianGrid horizontal={false} strokeDasharray="3 3" className="stroke-muted" />
-                      <XAxis
-                        type="number"
-                        hide
-                      />
-                      <YAxis
-                        dataKey="empresa"
-                        type="category"
-                        tickLine={false}
-                        tickMargin={10}
-                        axisLine={false}
-                        className="text-muted-foreground"
-                        width={120}
-                      />
-                      <Bar
-                        dataKey="proyectos"
-                        fill="var(--color-proyectos)"
-                        radius={[0, 4, 4, 0]}
-                      >
-                        <LabelList
-                          dataKey="proyectos"
-                          position="right"
-                          offset={8}
-                          className="fill-foreground font-medium"
-                          fontSize={12}
-                        />
-                      </Bar>
-                    </BarChart>
-                  </ChartContainer>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={chartData}
+                            dataKey="value"
+                            nameKey="name"
+                            innerRadius={60}
+                            outerRadius={100}
+                            strokeWidth={5}
+                            startAngle={90}
+                            endAngle={-270}
+                          >
+                            <RechartsLabel
+                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                              content={({ viewBox }: any) => {
+                                if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                                  const porcentajeCompletados = stats.totalProyectos > 0 
+                                    ? ((stats.proyectosCerrados / stats.totalProyectos) * 100).toFixed(0)
+                                    : 0;
+                                  return (
+                                    <text
+                                      x={viewBox.cx}
+                                      y={viewBox.cy}
+                                      textAnchor="middle"
+                                      dominantBaseline="middle"
+                                    >
+                                      <tspan
+                                        x={viewBox.cx}
+                                        y={viewBox.cy}
+                                        className="fill-foreground text-3xl font-bold"
+                                      >
+                                        {porcentajeCompletados}%
+                                      </tspan>
+                                      <tspan
+                                        x={viewBox.cx}
+                                        y={(viewBox.cy || 0) + 24}
+                                        className="fill-muted-foreground text-sm"
+                                      >
+                                        Completados
+                                      </tspan>
+                                    </text>
+                                  )
+                                }
+                              }}
+                            />
+                          </Pie>
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
+                  </div>
                 ) : (
                   <div className="flex items-center justify-center h-40 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border border-primary/20">
                     <div className="text-center">

@@ -181,13 +181,13 @@ export default function ProjectDetailPage() {
   const getEstadoBadge = (estado: string) => {
     switch (estado) {
       case 'abierto':
-        return <Badge className="bg-success/20 text-success border-success/30">Abierto</Badge>;
+        return <Badge className="bg-success/20 text-success border-success/30 text-[10px] sm:text-xs md:text-sm whitespace-nowrap px-1.5 sm:px-2 py-0.5">Abierto</Badge>;
       case 'cerrado':
-        return <Badge variant="secondary">Cerrado</Badge>;
+        return <Badge variant="secondary" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap px-1.5 sm:px-2 py-0.5">Cerrado</Badge>;
       case 'aprobado':
-        return <Badge className="bg-primary/20 text-primary border-primary/30">Aprobado</Badge>;
+        return <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px] sm:text-xs md:text-sm whitespace-nowrap px-1.5 sm:px-2 py-0.5">Aprobado</Badge>;
       default:
-        return <Badge variant="secondary">{estado}</Badge>;
+        return <Badge variant="secondary" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap px-1.5 sm:px-2 py-0.5">{estado}</Badge>;
     }
   };
 
@@ -576,40 +576,40 @@ export default function ProjectDetailPage() {
     
     // Carpetas y archivos especiales
     if (!extension || extension === nombreArchivo.toLowerCase()) {
-      return <Folder className="w-12 h-12 text-[#fbbf24]" />; // amarillo para carpetas
+      return <Folder className="w-11 h-11 sm:w-14 sm:h-14 text-[#fbbf24]" />; // amarillo para carpetas
     }
     
     // Documentos
     if (['doc', 'docx'].includes(extension)) {
-      return <FileText className="w-12 h-12 text-[#2563eb]" />; // azul para Word
+      return <FileText className="w-11 h-11 sm:w-14 sm:h-14 text-[#2563eb]" />; // azul para Word
     }
     
     if (['pdf'].includes(extension)) {
-      return <FileText className="w-12 h-12 text-[#dc2626]" />; // rojo para PDF
+      return <FileText className="w-11 h-11 sm:w-14 sm:h-14 text-[#dc2626]" />; // rojo para PDF
     }
     
     if (['xls', 'xlsx'].includes(extension)) {
-      return <FileText className="w-12 h-12 text-[#059669]" />; // verde para Excel
+      return <FileText className="w-11 h-11 sm:w-14 sm:h-14 text-[#059669]" />; // verde para Excel
     }
     
     if (['txt'].includes(extension)) {
-      return <FileText className="w-12 h-12 text-[#6b7280]" />; // gris para texto
+      return <FileText className="w-11 h-11 sm:w-14 sm:h-14 text-[#6b7280]" />; // gris para texto
     }
     
     if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(extension)) {
-      return <FileText className="w-12 h-12 text-[#8b5cf6]" />; // púrpura para imágenes
+      return <FileText className="w-11 h-11 sm:w-14 sm:h-14 text-[#8b5cf6]" />; // púrpura para imágenes
     }
     
     if (['zip', 'rar', '7z', 'tar', 'gz'].includes(extension)) {
-      return <FileText className="w-12 h-12 text-[#f59e0b]" />; // naranja para comprimidos
+      return <FileText className="w-11 h-11 sm:w-14 sm:h-14 text-[#f59e0b]" />; // naranja para comprimidos
     }
     
     if (['dwg', 'dxf'].includes(extension)) {
-      return <FileText className="w-12 h-12 text-[#06b6d4]" />; // cyan para CAD
+      return <FileText className="w-11 h-11 sm:w-14 sm:h-14 text-[#06b6d4]" />; // cyan para CAD
     }
     
     // Default
-    return <FileText className="w-12 h-12 text-muted-foreground" />;
+    return <FileText className="w-11 h-11 sm:w-14 sm:h-14 text-muted-foreground" />;
   };
 
   // Función para navegar a una carpeta
@@ -903,7 +903,7 @@ export default function ProjectDetailPage() {
 
     return (
       <div 
-        className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4 p-6 min-h-[300px] transition-all ${
+        className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-3 sm:gap-4 p-3 sm:p-6 min-h-[200px] sm:min-h-[300px] transition-all ${
           isDragging && carpetaActual && !dragOverCarpeta ? 'bg-primary/5' : ''
         }`}
         onDragEnter={handleDragEnter}
@@ -928,7 +928,7 @@ export default function ProjectDetailPage() {
             return (
               <div
                 key={`folder-${carpeta.id}`}
-                className={`flex flex-col items-center gap-2 p-3 rounded-lg transition-all cursor-pointer group relative ${
+                className={`flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-lg transition-all cursor-pointer group relative ${
                   isDropTarget 
                     ? 'bg-primary/20 ring-2 ring-primary scale-105' 
                     : 'hover:bg-accent/50'
@@ -945,21 +945,21 @@ export default function ProjectDetailPage() {
                 {isDropTarget && (
                   <div className="absolute inset-0 border-2 border-dashed border-primary rounded-lg pointer-events-none"></div>
                 )}
-                <div className="w-16 h-16 flex items-center justify-center">
-                  <Folder className={`w-14 h-14 text-[#fbbf24] transition-transform ${
+                <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center">
+                  <Folder className={`w-11 h-11 sm:w-14 sm:h-14 text-[#fbbf24] transition-transform ${
                     isDropTarget ? 'scale-110' : 'group-hover:scale-110'
                   }`} />
                 </div>
                 <div className="text-center w-full">
-                  <p className="text-xs text-foreground font-medium truncate px-1">
+                  <p className="text-[10px] sm:text-xs text-foreground font-medium truncate px-1">
                     {carpeta.nombre}
                   </p>
-                  <p className="text-[10px] text-muted-foreground">
+                  <p className="text-[9px] sm:text-[10px] text-muted-foreground">
                     {totalElementos} {totalElementos === 1 ? 'elemento' : 'elementos'}
                   </p>
                 </div>
                 {isDropTarget && (
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap">
+                  <div className="absolute -top-1 sm:-top-2 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap">
                     Soltar aquí
                   </div>
                 )}
@@ -971,17 +971,17 @@ export default function ProjectDetailPage() {
             return (
               <div
                 key={`file-${archivo.id}`}
-                className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-accent/50 transition-all cursor-pointer group"
+                className="flex flex-col items-center gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-lg hover:bg-accent/50 transition-all cursor-pointer group"
                 onClick={() => handleDescargarArchivo(archivo)}
               >
-                <div className="w-16 h-16 flex items-center justify-center">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center">
                   {getFileIcon(archivo.nombreOriginal)}
                 </div>
                 <div className="text-center w-full">
-                  <p className="text-xs text-foreground font-medium truncate px-1" title={archivo.nombreOriginal}>
+                  <p className="text-[10px] sm:text-xs text-foreground font-medium truncate px-1" title={archivo.nombreOriginal}>
                     {archivo.nombreOriginal}
                   </p>
-                  <p className="text-[10px] text-muted-foreground">
+                  <p className="text-[9px] sm:text-[10px] text-muted-foreground">
                     {formatSize(archivo.tamaño)}
                   </p>
                 </div>
@@ -1017,60 +1017,62 @@ export default function ProjectDetailPage() {
         </div>
 
         {/* Cabecera del Proyecto */}
-        <div className="bg-card border border-border rounded-xl p-6 mb-6 shadow-sm">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-start gap-4">
-              <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center">
-                <FolderKanban className="w-8 h-8 text-primary" />
+        <div className="bg-card border border-border rounded-xl p-4 sm:p-6 mb-6 shadow-sm">
+          <div className="flex items-start justify-between mb-4 gap-4">
+            <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                <FolderKanban className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
               </div>
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-foreground mb-2 break-words">
                   {proyecto.nombre}
                 </h1>
-                <p className="text-sm text-muted-foreground mb-2">
+                <p className="text-xs sm:text-sm text-muted-foreground mb-2">
                   {empresa?.nombre || 'Empresa desconocida'}
                 </p>
                 {proyecto.descripcion && (
-                  <p className="text-base text-foreground">{proyecto.descripcion}</p>
+                  <p className="text-xs sm:text-sm md:text-base text-foreground break-words line-clamp-2">{proyecto.descripcion}</p>
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-shrink-0">
               {getEstadoBadge(proyecto.estado)}
               {proyecto.estado === 'abierto' && (
                 <Button
                   variant="outline"
                   onClick={handleCerrarProyecto}
                   disabled={loading}
-                  className="gap-2"
+                  className="gap-0.5 sm:gap-1 md:gap-2 text-[10px] sm:text-xs md:text-sm h-7 sm:h-8 md:h-9 px-1.5 sm:px-2 md:px-3"
+                  size="sm"
                 >
-                  <Lock className="w-4 h-4" />
-                  Cerrar Proyecto
+                  <Lock className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 flex-shrink-0" />
+                  <span className="hidden sm:inline">Cerrar</span>
                 </Button>
               )}
-              <Button variant="outline" className="gap-2">
-                <Download className="w-4 h-4" />
-                Descargar Todo
+              <Button variant="outline" className="gap-0.5 sm:gap-1 md:gap-2 text-[10px] sm:text-xs md:text-sm h-7 sm:h-8 md:h-9 px-1.5 sm:px-2 md:px-3" size="sm">
+                <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 flex-shrink-0" />
+                <span className="hidden sm:inline">Descargar</span>
               </Button>
             </div>
           </div>
 
           {/* Info adicional */}
-          <div className="flex flex-wrap gap-6 text-sm text-muted-foreground pt-4 border-t border-border">
+          <div className="flex flex-wrap gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground pt-4 border-t border-border">
             <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              <span>Creado: {formatDate(proyecto.fechaCreacion)}</span>
+              <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Creado: </span>
+              <span>{formatDate(proyecto.fechaCreacion)}</span>
             </div>
             <div className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
+              <Users className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>{miembros.length} {miembros.length === 1 ? 'miembro' : 'miembros'}</span>
             </div>
             <div className="flex items-center gap-2">
-              <Folder className="w-4 h-4" />
+              <Folder className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>{carpetas.length} {carpetas.length === 1 ? 'carpeta' : 'carpetas'}</span>
             </div>
             <div className="flex items-center gap-2">
-              <File className="w-4 h-4" />
+              <File className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>{archivos.length} {archivos.length === 1 ? 'archivo' : 'archivos'}</span>
             </div>
           </div>
@@ -1078,18 +1080,20 @@ export default function ProjectDetailPage() {
 
         {/* Pestañas */}
         <Tabs defaultValue="carpetas" className="w-full">
-          <TabsList className="mb-6">
-            <TabsTrigger value="carpetas" className="gap-2">
-              <Folder className="w-4 h-4" />
-              Carpetas / Archivos
+          <TabsList className="mb-6 grid w-full grid-cols-3 h-auto">
+            <TabsTrigger value="carpetas" className="gap-1 sm:gap-2 text-xs sm:text-sm py-2 px-2 sm:px-4 h-auto">
+              <Folder className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+              <span className="hidden sm:inline">Carpetas / Archivos</span>
+              <span className="sm:hidden">Archivos</span>
             </TabsTrigger>
-            <TabsTrigger value="equipo" className="gap-2">
-              <Users className="w-4 h-4" />
-              Equipo ({miembros.length})
+            <TabsTrigger value="equipo" className="gap-1 sm:gap-2 text-xs sm:text-sm py-2 px-2 sm:px-4 h-auto">
+              <Users className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+              <span className="hidden sm:inline">Equipo ({miembros.length})</span>
+              <span className="sm:hidden">Equipo</span>
             </TabsTrigger>
-            <TabsTrigger value="actividad" className="gap-2">
-              <Clock className="w-4 h-4" />
-              Actividad
+            <TabsTrigger value="actividad" className="gap-1 sm:gap-2 text-xs sm:text-sm py-2 px-2 sm:px-4 h-auto">
+              <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+              <span>Actividad</span>
             </TabsTrigger>
           </TabsList>
 
@@ -1106,10 +1110,11 @@ export default function ProjectDetailPage() {
 
             {/* Botón de subir archivo */}
             {proyecto.estado !== 'cerrado' && carpetas.length > 0 && (
-              <div className="flex justify-end px-6">
-                <Button onClick={handleOpenUploadModal} className="gap-2">
-                  <Upload className="w-4 h-4" />
-                  Subir Archivo
+              <div className="flex justify-end px-2 sm:px-6">
+                <Button onClick={handleOpenUploadModal} className="gap-2 text-xs sm:text-sm" size="sm">
+                  <Upload className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Subir Archivo</span>
+                  <span className="sm:hidden">Subir</span>
                 </Button>
               </div>
             )}
@@ -1120,9 +1125,9 @@ export default function ProjectDetailPage() {
             }`}>
               {/* Indicador de drag activo */}
               {isDragging && (
-                <div className="bg-primary/10 border-b border-primary/30 px-4 py-2 flex items-center gap-2">
-                  <Upload className="w-4 h-4 text-primary animate-bounce" />
-                  <span className="text-sm text-primary font-medium">
+                <div className="bg-primary/10 border-b border-primary/30 px-3 sm:px-4 py-2 flex items-center gap-2">
+                  <Upload className="w-3 h-3 sm:w-4 sm:h-4 text-primary animate-bounce flex-shrink-0" />
+                  <span className="text-xs sm:text-sm text-primary font-medium truncate">
                     {carpetaActual 
                       ? 'Arrastra los archivos a una carpeta o suéltalos aquí' 
                       : 'Arrastra los archivos a una carpeta específica'}
@@ -1131,48 +1136,48 @@ export default function ProjectDetailPage() {
               )}
               
               {/* Barra de navegación / Breadcrumb */}
-              <div className="border-b border-border bg-muted/30 px-4 py-3 flex items-center gap-2">
+              <div className="border-b border-border bg-muted/30 px-2 sm:px-4 py-2 sm:py-3 flex items-center gap-2">
                 {/* Botón volver atrás */}
                 {historialCarpetas.length > 1 && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={handleVolverAtras}
-                    className="gap-2 h-8"
+                    className="gap-1 sm:gap-2 h-7 sm:h-8 px-2 sm:px-3 flex-shrink-0"
                   >
-                    <ArrowLeft className="w-4 h-4" />
-                    Atrás
+                    <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="hidden sm:inline">Atrás</span>
                   </Button>
                 )}
 
                 {/* Breadcrumb */}
-                <div className="flex items-center gap-1 flex-1 overflow-x-auto">
+                <div className="flex items-center gap-0.5 sm:gap-1 flex-1 overflow-x-auto">
                   {historialCarpetas.map((carpeta, index) => (
                     <React.Fragment key={index}>
                       {index > 0 && (
-                        <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
                       )}
                       <button
                         onClick={() => handleIrACarpeta(index)}
-                        className={`flex items-center gap-1.5 px-2 py-1 rounded text-sm transition-colors flex-shrink-0 ${
+                        className={`flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs sm:text-sm transition-colors flex-shrink-0 ${
                           index === historialCarpetas.length - 1
                             ? 'text-foreground font-medium bg-accent/50'
                             : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
                         }`}
                       >
                         {index === 0 ? (
-                          <Home className="w-4 h-4" />
+                          <Home className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                         ) : (
-                          <Folder className="w-4 h-4" />
+                          <Folder className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                         )}
-                        <span className="truncate max-w-[150px]">{carpeta.nombre}</span>
+                        <span className="truncate max-w-[80px] sm:max-w-[150px]">{carpeta.nombre}</span>
                       </button>
                     </React.Fragment>
                   ))}
                 </div>
 
                 {/* Info de elementos */}
-                <div className="text-xs text-muted-foreground whitespace-nowrap">
+                <div className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap flex-shrink-0 hidden sm:block">
                   {carpetaActual === null ? (
                     <span>{carpetas.filter(c => !c.padreId).length} carpetas</span>
                   ) : (
