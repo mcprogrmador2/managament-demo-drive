@@ -325,14 +325,7 @@ export default function EmpresaDetailPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => router.push('/administradores/areas')}
-                >
-                  <FolderOpen className="w-4 h-4 mr-2" />
-                  Gestionar Áreas
-                </Button>
+                
                 <Button 
                   variant="outline" 
                   className="w-full justify-start"
@@ -344,7 +337,7 @@ export default function EmpresaDetailPage() {
                 <Button 
                   variant="outline" 
                   className="w-full justify-start"
-                  onClick={() => router.push('/administradores/trabajadores')}
+                  onClick={() => router.push(`/administradores/empresas/${empresaId}/trabajadores`)}
                 >
                   <Users className="w-4 h-4 mr-2" />
                   Ver Trabajadores
