@@ -329,7 +329,7 @@ export default function EmpresaDetailPage() {
                 <Button 
                   variant="outline" 
                   className="w-full justify-start"
-                  onClick={() => router.push('/administradores/proyectos')}
+                  onClick={() => router.push(`/administradores/empresas/${empresaId}/proyectos`)}
                 >
                   <FileText className="w-4 h-4 mr-2" />
                   Ver Proyectos
