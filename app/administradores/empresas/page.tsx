@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { 
   Building2, 
   Plus, 
@@ -31,6 +32,7 @@ import { toast } from 'sonner';
 import { Empresa } from '@/lib/projectTypes';
 
 export default function EmpresasPage() {
+  const router = useRouter();
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -128,7 +130,11 @@ export default function EmpresasPage() {
         {/* Listado de Empresas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {empresas.map((empresa) => (
-            <Card key={empresa.id} className="border-primary/20 hover:border-primary/40 transition-all group">
+            <Card 
+              key={empresa.id} 
+              className="border-primary/20 hover:border-primary/40 transition-all group cursor-pointer"
+              onClick={() => router.push(`/administradores/empresas/${empresa.id}`)}
+            >
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
