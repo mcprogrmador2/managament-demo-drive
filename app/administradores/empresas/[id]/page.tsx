@@ -33,7 +33,7 @@ import { Empresa, Area, Proyecto } from '@/lib/projectTypes';
 export default function EmpresaDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const empresaId = params.name as string;
+  const empresaId = params.id as string;
 
   const [empresa, setEmpresa] = useState<Empresa | null>(null);
   const [areas, setAreas] = useState<Area[]>([]);

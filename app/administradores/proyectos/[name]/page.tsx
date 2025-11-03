@@ -17,17 +17,16 @@ import {
   Folder,
   File,
   Trash2,
-  Eye,
   X,
   Loader2,
   Edit2,
   UserPlus,
-  ChevronRight,
-  ChevronDown,
   UserMinus,
   MessageSquare,
   Activity,
-  Sparkles
+  Sparkles,
+  ChevronRight,
+  Home
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,7 +35,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -97,11 +95,16 @@ export default function ProjectDetailPage() {
   });
   const [allUsuarios, setAllUsuarios] = useState<Usuario[]>([]);
 
-  // Estados para vista en árbol
-  const [openFolders, setOpenFolders] = useState<Set<string>>(new Set());
+  // Estados para navegación de carpetas
+  const [carpetaActual, setCarpetaActual] = useState<string | null>(null);
+  const [historialCarpetas, setHistorialCarpetas] = useState<Array<{ id: string | null, nombre: string }>>([
+    { id: null, nombre: 'Raíz' }
+  ]);
+
 
   useEffect(() => {
     loadProjectData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId]);
 
   const loadProjectData = () => {
@@ -200,7 +203,7 @@ export default function ProjectDetailPage() {
       
       toast.success('Proyecto cerrado exitosamente');
       loadProjectData();
-    } catch (error) {
+    } catch {
       toast.error('Error al cerrar el proyecto');
     } finally {
       setLoading(false);
@@ -545,88 +548,164 @@ export default function ProjectDetailPage() {
     return formatDate(timestamp);
   };
 
-  // Función para toggle de carpeta abierta
-  const toggleFolder = (carpetaId: string) => {
-    setOpenFolders(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(carpetaId)) {
-        newSet.delete(carpetaId);
-      } else {
-        newSet.add(carpetaId);
-      }
-      return newSet;
-    });
+
+  // Función para obtener el icono según la extensión del archivo
+  const getFileIcon = (nombreArchivo: string) => {
+    const extension = nombreArchivo.split('.').pop()?.toLowerCase();
+    
+    // Carpetas y archivos especiales
+    if (!extension || extension === nombreArchivo.toLowerCase()) {
+      return <Folder className="w-12 h-12 text-[#fbbf24]" />; // amarillo para carpetas
+    }
+    
+    // Documentos
+    if (['doc', 'docx'].includes(extension)) {
+      return <FileText className="w-12 h-12 text-[#2563eb]" />; // azul para Word
+    }
+    
+    if (['pdf'].includes(extension)) {
+      return <FileText className="w-12 h-12 text-[#dc2626]" />; // rojo para PDF
+    }
+    
+    if (['xls', 'xlsx'].includes(extension)) {
+      return <FileText className="w-12 h-12 text-[#059669]" />; // verde para Excel
+    }
+    
+    if (['txt'].includes(extension)) {
+      return <FileText className="w-12 h-12 text-[#6b7280]" />; // gris para texto
+    }
+    
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(extension)) {
+      return <FileText className="w-12 h-12 text-[#8b5cf6]" />; // púrpura para imágenes
+    }
+    
+    if (['zip', 'rar', '7z', 'tar', 'gz'].includes(extension)) {
+      return <FileText className="w-12 h-12 text-[#f59e0b]" />; // naranja para comprimidos
+    }
+    
+    if (['dwg', 'dxf'].includes(extension)) {
+      return <FileText className="w-12 h-12 text-[#06b6d4]" />; // cyan para CAD
+    }
+    
+    // Default
+    return <FileText className="w-12 h-12 text-muted-foreground" />;
   };
 
-  // Función para obtener carpetas raíz (sin padre)
-  const getRootFolders = () => {
-    return carpetas.filter((carpeta: Carpeta) => !carpeta.padreId);
+  // Función para navegar a una carpeta
+  const handleAbrirCarpeta = (carpeta: Carpeta) => {
+    setCarpetaActual(carpeta.id);
+    setHistorialCarpetas(prev => [...prev, { id: carpeta.id, nombre: carpeta.nombre }]);
   };
 
-  // Función para renderizar carpeta simple con archivos
-  const renderFolder = (carpeta: Carpeta) => {
-    const isOpen = openFolders.has(carpeta.id);
-    const archivosCarpeta = archivos.filter((arch: Archivo) => arch.carpetaId === carpeta.id);
+  // Función para volver a la carpeta anterior
+  const handleVolverAtras = () => {
+    if (historialCarpetas.length > 1) {
+      const nuevoHistorial = [...historialCarpetas];
+      nuevoHistorial.pop();
+      setHistorialCarpetas(nuevoHistorial);
+      const carpetaAnterior = nuevoHistorial[nuevoHistorial.length - 1];
+      setCarpetaActual(carpetaAnterior.id);
+    }
+  };
+
+  // Función para ir a una carpeta específica del breadcrumb
+  const handleIrACarpeta = (index: number) => {
+    const nuevoHistorial = historialCarpetas.slice(0, index + 1);
+    setHistorialCarpetas(nuevoHistorial);
+    const carpetaDestino = nuevoHistorial[nuevoHistorial.length - 1];
+    setCarpetaActual(carpetaDestino.id);
+  };
+
+  // Función para renderizar vista de cuadrícula estilo Windows Explorer
+  const renderGridView = () => {
+    // Filtrar carpetas y archivos según la carpeta actual
+    let carpetasFiltradas: Carpeta[];
+    let archivosFiltrados: Archivo[];
+
+    if (carpetaActual === null) {
+      // Mostrar carpetas raíz (sin padre) y archivos sin carpeta
+      carpetasFiltradas = carpetas.filter(c => !c.padreId);
+      archivosFiltrados = [];
+    } else {
+      // Mostrar subcarpetas y archivos de la carpeta actual
+      carpetasFiltradas = carpetas.filter(c => c.padreId === carpetaActual);
+      archivosFiltrados = archivos.filter(a => a.carpetaId === carpetaActual);
+    }
+
+    // Combinar carpetas y archivos
+    const items: Array<{ type: 'folder' | 'file', data: Carpeta | Archivo }> = [
+      ...carpetasFiltradas.map(c => ({ type: 'folder' as const, data: c })),
+      ...archivosFiltrados.map(a => ({ type: 'file' as const, data: a }))
+    ];
+
+    if (items.length === 0) {
+      return (
+        <div className="text-center py-16 text-muted-foreground">
+          <div className="w-24 h-24 mx-auto mb-4 bg-primary/5 rounded-full flex items-center justify-center">
+            <Folder className="w-12 h-12 text-primary/50" />
+          </div>
+          <p className="text-lg font-medium mb-2">
+            {carpetaActual ? 'Esta carpeta está vacía' : 'No hay carpetas ni archivos en este proyecto'}
+          </p>
+          <p className="text-sm mb-6">
+            {carpetaActual ? 'No hay elementos en esta carpeta' : 'Los archivos aparecerán aquí cuando se suban'}
+          </p>
+        </div>
+      );
+    }
 
     return (
-      <div key={carpeta.id} className="border border-border rounded-lg overflow-hidden">
-        <Collapsible open={isOpen} onOpenChange={() => toggleFolder(carpeta.id)}>
-          <CollapsibleTrigger className="w-full">
-            <div className="flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors cursor-pointer">
-              <div className="flex items-center gap-2">
-                {isOpen ? (
-                  <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform" />
-                ) : (
-                  <ChevronRight className="w-4 h-4 text-muted-foreground transition-transform" />
-                )}
-                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <Folder className="w-5 h-5 text-primary" />
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4 p-6">
+        {items.map((item) => {
+          if (item.type === 'folder') {
+            const carpeta = item.data as Carpeta;
+            const archivosCarpeta = archivos.filter(a => a.carpetaId === carpeta.id);
+            const subcarpetas = carpetas.filter(c => c.padreId === carpeta.id);
+            const totalElementos = archivosCarpeta.length + subcarpetas.length;
+            
+            return (
+              <div
+                key={`folder-${carpeta.id}`}
+                className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-accent/50 transition-all cursor-pointer group"
+                onClick={() => handleAbrirCarpeta(carpeta)}
+              >
+                <div className="w-16 h-16 flex items-center justify-center">
+                  <Folder className="w-14 h-14 text-[#fbbf24] group-hover:scale-110 transition-transform" />
                 </div>
-              </div>
-              <div className="flex-1 text-left">
-                <h3 className="font-semibold text-foreground">{carpeta.nombre}</h3>
-                {carpeta.descripcion && (
-                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
-                    {carpeta.descripcion}
+                <div className="text-center w-full">
+                  <p className="text-xs text-foreground font-medium truncate px-1">
+                    {carpeta.nombre}
                   </p>
-                )}
-              </div>
-              <div className="text-right">
-                <Badge variant="outline" className="text-xs">
-                  {archivosCarpeta.length} {archivosCarpeta.length === 1 ? 'archivo' : 'archivos'}
-                </Badge>
-              </div>
-            </div>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <div className="border-t border-border bg-muted/20">
-              {archivosCarpeta.length > 0 ? (
-                <div className="p-4 space-y-1">
-                  {archivosCarpeta.map((archivo: Archivo) => (
-                    <div
-                      key={archivo.id}
-                      className="flex items-center gap-3 p-3 rounded-md hover:bg-background transition-colors cursor-pointer group border border-border/50"
-                      onClick={() => handleDescargarArchivo(archivo)}
-                    >
-                      <FileText className="w-4 h-4 text-primary flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <span className="text-sm text-foreground truncate">{archivo.nombreOriginal}</span>
-                      </div>
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">
-                        {formatSize(archivo.tamaño)}
-                      </span>
-                    </div>
-                  ))}
+                  <p className="text-[10px] text-muted-foreground">
+                    {totalElementos} {totalElementos === 1 ? 'elemento' : 'elementos'}
+                  </p>
                 </div>
-              ) : (
-                <div className="p-8 text-center text-muted-foreground">
-                  <FileText className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                  <p className="text-sm">No hay archivos en esta carpeta</p>
+              </div>
+            );
+          } else {
+            const archivo = item.data as Archivo;
+            
+            return (
+              <div
+                key={`file-${archivo.id}`}
+                className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-accent/50 transition-all cursor-pointer group"
+                onClick={() => handleDescargarArchivo(archivo)}
+              >
+                <div className="w-16 h-16 flex items-center justify-center">
+                  {getFileIcon(archivo.nombreOriginal)}
                 </div>
-              )}
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
+                <div className="text-center w-full">
+                  <p className="text-xs text-foreground font-medium truncate px-1" title={archivo.nombreOriginal}>
+                    {archivo.nombreOriginal}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {formatSize(archivo.tamaño)}
+                  </p>
+                </div>
+              </div>
+            );
+          }
+        })}
       </div>
     );
   };
@@ -744,7 +823,7 @@ export default function ProjectDetailPage() {
 
             {/* Botón de subir archivo */}
             {proyecto.estado !== 'cerrado' && carpetas.length > 0 && (
-              <div className="flex justify-end">
+              <div className="flex justify-end px-6">
                 <Button onClick={handleOpenUploadModal} className="gap-2">
                   <Upload className="w-4 h-4" />
                   Subir Archivo
@@ -752,19 +831,65 @@ export default function ProjectDetailPage() {
               </div>
             )}
 
-            {carpetas.length > 0 ? (
-              <div className="space-y-2">
-                {carpetas.map((carpeta: Carpeta) => renderFolder(carpeta))}
-              </div>
-            ) : (
-              <div className="text-center py-16 text-muted-foreground">
-                <div className="w-24 h-24 mx-auto mb-4 bg-primary/5 rounded-full flex items-center justify-center">
-                  <Folder className="w-12 h-12 text-primary/50" />
+            {/* Vista de cuadrícula estilo Windows Explorer */}
+            <div className="bg-card border border-border rounded-xl overflow-hidden">
+              {/* Barra de navegación / Breadcrumb */}
+              <div className="border-b border-border bg-muted/30 px-4 py-3 flex items-center gap-2">
+                {/* Botón volver atrás */}
+                {historialCarpetas.length > 1 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleVolverAtras}
+                    className="gap-2 h-8"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    Atrás
+                  </Button>
+                )}
+
+                {/* Breadcrumb */}
+                <div className="flex items-center gap-1 flex-1 overflow-x-auto">
+                  {historialCarpetas.map((carpeta, index) => (
+                    <React.Fragment key={index}>
+                      {index > 0 && (
+                        <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                      )}
+                      <button
+                        onClick={() => handleIrACarpeta(index)}
+                        className={`flex items-center gap-1.5 px-2 py-1 rounded text-sm transition-colors flex-shrink-0 ${
+                          index === historialCarpetas.length - 1
+                            ? 'text-foreground font-medium bg-accent/50'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
+                        }`}
+                      >
+                        {index === 0 ? (
+                          <Home className="w-4 h-4" />
+                        ) : (
+                          <Folder className="w-4 h-4" />
+                        )}
+                        <span className="truncate max-w-[150px]">{carpeta.nombre}</span>
+                      </button>
+                    </React.Fragment>
+                  ))}
                 </div>
-                <p className="text-lg font-medium mb-2">No hay carpetas en este proyecto</p>
-                <p className="text-sm mb-6">Las carpetas aparecerán aquí cuando se creen</p>
+
+                {/* Info de elementos */}
+                <div className="text-xs text-muted-foreground whitespace-nowrap">
+                  {carpetaActual === null ? (
+                    <span>{carpetas.filter(c => !c.padreId).length} carpetas</span>
+                  ) : (
+                    <span>
+                      {carpetas.filter(c => c.padreId === carpetaActual).length + 
+                       archivos.filter(a => a.carpetaId === carpetaActual).length} elementos
+                    </span>
+                  )}
+                </div>
               </div>
-            )}
+
+              {/* Contenido de archivos y carpetas */}
+              {renderGridView()}
+            </div>
           </TabsContent>
 
           {/* Tab Equipo */}
