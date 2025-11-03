@@ -26,7 +26,8 @@ import {
   Activity,
   Sparkles,
   ChevronRight,
-  Home
+  Home,
+  FolderPlus
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -105,11 +106,27 @@ export default function ProjectDetailPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOverCarpeta, setDragOverCarpeta] = useState<string | null>(null);
 
+  // Estados para menú contextual y crear carpeta
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
+  const [createFolderLoading, setCreateFolderLoading] = useState(false);
+  const [createFolderData, setCreateFolderData] = useState({
+    nombre: '',
+    descripcion: ''
+  });
+
 
   useEffect(() => {
     loadProjectData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId]);
+
+  // Cerrar menú contextual al hacer click
+  useEffect(() => {
+    const handleClick = () => setContextMenu(null);
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, []);
 
   const loadProjectData = () => {
     initializeProjectData();
@@ -620,6 +637,91 @@ export default function ProjectDetailPage() {
     setCarpetaActual(carpetaDestino.id);
   };
 
+  // Función para manejar click derecho
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY });
+  };
+
+  // Función para abrir modal de crear carpeta
+  const handleOpenCreateFolderModal = () => {
+    setContextMenu(null);
+    setIsCreateFolderModalOpen(true);
+  };
+
+  // Función para cerrar modal de crear carpeta
+  const handleCloseCreateFolderModal = () => {
+    setIsCreateFolderModalOpen(false);
+    setCreateFolderData({
+      nombre: '',
+      descripcion: ''
+    });
+    setCreateFolderLoading(false);
+  };
+
+  // Función para crear carpeta
+  const handleCreateFolder = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!createFolderData.nombre.trim()) {
+      toast.error('El nombre de la carpeta es obligatorio');
+      return;
+    }
+
+    setCreateFolderLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 400));
+
+    try {
+      const session = getSession();
+      if (!session) {
+        toast.error('No hay sesión activa');
+        setCreateFolderLoading(false);
+        return;
+      }
+
+      // Crear la carpeta
+      const nuevaCarpeta: Carpeta = {
+        id: generateProjectId('carp'),
+        proyectoId: projectId,
+        nombre: createFolderData.nombre.trim(),
+        descripcion: createFolderData.descripcion.trim() || undefined,
+        padreId: carpetaActual || undefined,
+        orden: 0,
+        restricciones: {
+          tipo: 'publica'
+        },
+        fechaCreacion: getCurrentTimestamp(),
+        creadoPor: session.userId || session.username
+      };
+
+      carpetasStorage.create(nuevaCarpeta);
+
+      // Crear actividad
+      const usuario = usuariosProyectosStorage.getById(session.userId);
+      const ubicacion = carpetaActual 
+        ? carpetas.find(c => c.id === carpetaActual)?.nombre 
+        : 'raíz';
+
+      actividadesStorage.create({
+        id: generateProjectId('act'),
+        proyectoId: projectId,
+        tipo: 'comentario',
+        usuarioId: session.userId || session.username,
+        descripcion: `${usuario ? usuario.nombre : 'Usuario'} creó la carpeta "${createFolderData.nombre}" en ${ubicacion}`,
+        fechaCreacion: getCurrentTimestamp()
+      });
+
+      toast.success('Carpeta creada exitosamente');
+      handleCloseCreateFolderModal();
+      loadProjectData();
+    } catch (error) {
+      toast.error('Error al crear carpeta');
+      console.error(error);
+    } finally {
+      setCreateFolderLoading(false);
+    }
+  };
+
   // Funciones para drag and drop
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
@@ -780,6 +882,7 @@ export default function ProjectDetailPage() {
           onDragLeave={handleDragLeave}
           onDragOver={handleDragOver}
           onDrop={(e) => handleDrop(e, carpetaActual)}
+          onContextMenu={handleContextMenu}
         >
           <div className="w-24 h-24 mx-auto mb-4 bg-primary/5 rounded-full flex items-center justify-center">
             <Folder className="w-12 h-12 text-primary/50" />
@@ -812,6 +915,7 @@ export default function ProjectDetailPage() {
             handleDrop(e, carpetaActual);
           }
         }}
+        onContextMenu={handleContextMenu}
       >
         {items.map((item) => {
           if (item.type === 'folder') {
@@ -1429,6 +1533,121 @@ export default function ProjectDetailPage() {
                         <>
                           <Upload className="w-4 h-4" />
                           Subir Archivo
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {/* Menú Contextual */}
+        {contextMenu && (
+          <div
+            className="fixed z-[100] bg-card border border-border rounded-lg shadow-lg py-1 min-w-[200px]"
+            style={{
+              left: `${contextMenu.x}px`,
+              top: `${contextMenu.y}px`
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={handleOpenCreateFolderModal}
+              className="w-full px-4 py-2 text-left text-sm hover:bg-accent transition-colors flex items-center gap-2 text-foreground"
+            >
+              <FolderPlus className="w-4 h-4 text-primary" />
+              Nueva Carpeta
+            </button>
+          </div>
+        )}
+
+        {/* Modal de Crear Carpeta */}
+        {isCreateFolderModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={handleCloseCreateFolderModal}></div>
+            <div className="relative z-50 w-full max-w-md mx-4">
+              <Card className="border-primary/20 shadow-2xl">
+                <CardHeader className="border-b border-border">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-primary">
+                      <FolderPlus className="w-5 h-5" />
+                      Crear Nueva Carpeta
+                    </CardTitle>
+                    <button
+                      onClick={handleCloseCreateFolderModal}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                </CardHeader>
+                <form onSubmit={handleCreateFolder}>
+                  <CardContent className="p-6 space-y-4">
+                    {/* Ubicación actual */}
+                    <div className="bg-accent/30 border border-accent/50 rounded-lg p-3">
+                      <p className="text-xs text-muted-foreground mb-1">Ubicación:</p>
+                      <div className="flex items-center gap-1.5">
+                        {carpetaActual ? (
+                          <>
+                            <Folder className="w-4 h-4 text-primary" />
+                            <span className="text-sm font-medium text-foreground">
+                              {carpetas.find(c => c.id === carpetaActual)?.nombre || 'Carpeta'}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <Home className="w-4 h-4 text-primary" />
+                            <span className="text-sm font-medium text-foreground">Raíz</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="nombreCarpeta">Nombre *</Label>
+                      <Input
+                        id="nombreCarpeta"
+                        placeholder="Ej: Documentos Técnicos"
+                        value={createFolderData.nombre}
+                        onChange={(e) => setCreateFolderData({ ...createFolderData, nombre: e.target.value })}
+                        required
+                        disabled={createFolderLoading}
+                        autoFocus
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="descripcionCarpeta">Descripción (opcional)</Label>
+                      <Input
+                        id="descripcionCarpeta"
+                        placeholder="Breve descripción de la carpeta"
+                        value={createFolderData.descripcion}
+                        onChange={(e) => setCreateFolderData({ ...createFolderData, descripcion: e.target.value })}
+                        disabled={createFolderLoading}
+                      />
+                    </div>
+                  </CardContent>
+                  <div className="border-t border-border p-6 flex justify-end gap-3">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={handleCloseCreateFolderModal} 
+                      disabled={createFolderLoading}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button type="submit" disabled={createFolderLoading} className="gap-2">
+                      {createFolderLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Creando...
+                        </>
+                      ) : (
+                        <>
+                          <FolderPlus className="w-4 h-4" />
+                          Crear Carpeta
                         </>
                       )}
                     </Button>
