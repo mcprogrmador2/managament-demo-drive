@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { 
   Briefcase, 
@@ -76,37 +76,37 @@ export default function EmpresaProyectosPage() {
     areasAsociadas: [] as string[]
   });
 
-  const loadData = () => {
+  const loadData = useCallback(() => {
     initializeProjectData();
     
     // Cargar empresa
     const empresaData = empresasStorage.getById(empresaId);
     if (empresaData) {
       setEmpresa(empresaData);
+
+      // Cargar áreas de la empresa
+      const areasData = areasStorage.find((area: Area) => area.empresaId === empresaId);
+      setAreas(areasData);
+
+      // Cargar proyectos de la empresa
+      const allProjects = proyectosStorage.find((proyecto: Proyecto) => proyecto.empresaId === empresaId);
+      setAllProyectos(allProjects);
+      setFilteredProyectos(allProjects);
+
+      // Cargar PMs y usuarios
+      setPms(usuariosProyectosStorage.getAll().filter((u: Usuario) => u.rol === 'pm' && u.activo));
+      setUsuarios(usuariosProyectosStorage.getAll());
+      
+      setLoading(false);
     } else {
+      setLoading(false);
       router.push('/administradores/empresas');
-      return;
     }
-
-    // Cargar áreas de la empresa
-    const areasData = areasStorage.find((area: Area) => area.empresaId === empresaId);
-    setAreas(areasData);
-
-    // Cargar proyectos de la empresa
-    const allProjects = proyectosStorage.find((proyecto: Proyecto) => proyecto.empresaId === empresaId);
-    setAllProyectos(allProjects);
-    setFilteredProyectos(allProjects);
-
-    // Cargar PMs y usuarios
-    setPms(usuariosProyectosStorage.getAll().filter((u: Usuario) => u.rol === 'pm' && u.activo));
-    setUsuarios(usuariosProyectosStorage.getAll());
-    
-    setLoading(false);
-  };
+  }, [empresaId, router]);
 
   useEffect(() => {
     loadData();
-  }, [empresaId]);
+  }, [loadData]);
 
   // Filtrar proyectos cuando cambian los filtros
   useEffect(() => {

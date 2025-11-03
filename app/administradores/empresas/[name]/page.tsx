@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { 
   Building2, 
@@ -40,7 +40,7 @@ export default function EmpresaDetailPage() {
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadEmpresaData = () => {
+  const loadEmpresaData = useCallback(() => {
     initializeProjectData();
     
     const empresaData = empresasStorage.getById(empresaId);
@@ -54,17 +54,17 @@ export default function EmpresaDetailPage() {
       // Cargar proyectos de la empresa
       const proyectosData = proyectosStorage.find((proyecto: Proyecto) => proyecto.empresaId === empresaId);
       setProyectos(proyectosData);
+      setLoading(false);
     } else {
       // Si no encuentra la empresa, redirigir a la lista
+      setLoading(false);
       router.push('/administradores/empresas');
     }
-    
-    setLoading(false);
-  };
+  }, [empresaId, router]);
 
   useEffect(() => {
     loadEmpresaData();
-  }, [empresaId]);
+  }, [loadEmpresaData]);
 
   const handleBack = () => {
     router.push('/administradores/empresas');

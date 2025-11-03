@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { 
   Users, 
@@ -64,36 +64,36 @@ export default function EmpresaTrabajadoresPage() {
     areasAsignadas: [] as string[]
   });
 
-  const loadData = () => {
+  const loadData = useCallback(() => {
     initializeProjectData();
     
     // Cargar empresa
     const empresaData = empresasStorage.getById(empresaId);
     if (empresaData) {
       setEmpresa(empresaData);
+
+      // Cargar áreas de la empresa
+      const areasData = areasStorage.find((area: Area) => area.empresaId === empresaId);
+      setAreas(areasData);
+
+      // Cargar usuarios que tengan áreas asignadas de esta empresa
+      const allUsers = usuariosProyectosStorage.getAll();
+      const usuariosEmpresa = allUsers.filter((usuario: Usuario) => 
+        usuario.areasAsignadas.some(areaId => areasData.some((a: Area) => a.id === areaId))
+      );
+      
+      setAllUsuarios(usuariosEmpresa);
+      setFilteredUsuarios(usuariosEmpresa);
+      setLoading(false);
     } else {
+      setLoading(false);
       router.push('/administradores/empresas');
-      return;
     }
-
-    // Cargar áreas de la empresa
-    const areasData = areasStorage.find((area: Area) => area.empresaId === empresaId);
-    setAreas(areasData);
-
-    // Cargar usuarios que tengan áreas asignadas de esta empresa
-    const allUsers = usuariosProyectosStorage.getAll();
-    const usuariosEmpresa = allUsers.filter((usuario: Usuario) => 
-      usuario.areasAsignadas.some(areaId => areasData.some((a: Area) => a.id === areaId))
-    );
-    
-    setAllUsuarios(usuariosEmpresa);
-    setFilteredUsuarios(usuariosEmpresa);
-    setLoading(false);
-  };
+  }, [empresaId, router]);
 
   useEffect(() => {
     loadData();
-  }, [empresaId]);
+  }, [loadData]);
 
   // Filtrar usuarios cuando cambian los filtros
   useEffect(() => {
