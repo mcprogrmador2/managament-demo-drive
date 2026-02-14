@@ -74,7 +74,7 @@ export default function AdministradorLayout({
           </div>
         </header>
         <main className="flex-1 overflow-auto">
-          <div className="p-6">
+          <div className="p-6 pb-12">
             {children}
           </div>
         </main>

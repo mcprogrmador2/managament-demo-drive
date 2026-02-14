@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { allsavfeUrl } from '@/lib/variables';
 import { 
   LayoutDashboard, 
   LogOut, 
@@ -166,19 +167,7 @@ export function OficinaCentralSidebar({ usuarioNombre, isCollapsed, onToggleColl
         {/* Footer */}
         {!isCollapsed && (
           <div className="text-center pt-2">
-            <p className="text-xs text-muted-foreground mb-2">
-              Desarrollado por
-            </p>
-            <a
-              href="https://monstruocreativo.com/software/?v=dd07de856139"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors duration-200 hover:scale-105"
-              aria-label="Visitar sitio web de Monstruo Creativo"
-            >
-              <span className="w-2 h-2 bg-primary rounded-full"></span>
-              Monstruo Creativo
-            </a>
+
           </div>
         )}
       </div>
